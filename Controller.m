@@ -453,23 +453,28 @@ AECreateDesc:;
     err = CGSGetConnectionIDForPSN(0, &pSN, &connectionID);
     if( err == noErr ) {
 	
-        //err = CGSGetOnScreenWindowCount(myConnectionID, connectionID, &count);
-		err = CGSGetWindowCount(myConnectionID, connectionID, &count);
+        err = CGSGetOnScreenWindowCount(myConnectionID, connectionID, &count);
         if( (err == noErr) && (count > 0) ) {
-            int windowList[count]; // = (int*)calloc(count, sizeof(int));
+            int windowList[count];
             int actualIDs = 0;
             int i = 0;
-			
-            //err = CGSGetOnScreenWindowList(myConnectionID, connectionID, count, windowList, &actualIDs);
-			err = CGSGetWindowList(myConnectionID, connectionID, count, windowList, &actualIDs);
-			
+
+            err = CGSGetOnScreenWindowList(myConnectionID, connectionID, count, windowList, &actualIDs);
             for(i = 0; i < actualIDs; i++) {
 				CGSWindow window = windowList[i];
-				CGSValue windowTitle;
-				CFStringRef titleKey = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, "kCGSWindowTitle", kCFStringEncodingUTF8, kCFAllocatorNull);
-                //FIXME
-//                err = CGSGetWindowProperty(myConnectionID, window, (int)titleKey, &windowTitle); // CGSCreateCStringNoCopy("kCGSWindowTitle") busted on Leopard
-                if(titleKey) CFRelease(titleKey);
+				NSString *windowTitle = NULL;
+                
+                uint32_t windowid[1] = {window};
+                CFArrayRef windowArray = CFArrayCreate ( NULL, (const void **)windowid, 1 ,NULL);
+                CFArrayRef windowsdescription = CGWindowListCreateDescriptionFromArray(windowArray);
+                CFDictionaryRef windowdescription = (CFDictionaryRef)CFArrayGetValueAtIndex ((CFArrayRef)windowsdescription, 0);
+                if(CFDictionaryContainsKey(windowdescription, kCGWindowName))
+                {
+                    CFStringRef windowName = CFDictionaryGetValue(windowdescription, kCGWindowName);
+                    windowTitle = (NSString*)windowName;
+                }
+                CFRelease(windowArray);
+                
 				if(err == noErr && windowTitle) {
 					return window;
 				}
@@ -791,11 +796,11 @@ AECreateDesc:;
 			foundPtQ1.x = foundPtQ4.x = foundPtQ1.x + [self bobberOffsetX];
 			foundPtQ1.y += [self bobberOffsetY];  // since it's in Q1
 			foundPtQ4.y -= [self bobberOffsetY];  // since it's in Q4
-			
+            
 			// get the point in the window to a point on the screen
 			CGRect wowRect;
 			CGSGetWindowBounds(_CGSDefaultConnection(), windowID, &wowRect);
-			NSPoint screenPt = foundPtQ1; 
+            NSPoint screenPt = foundPtQ1;
 			screenPt.x += wowRect.origin.x;
 			screenPt.y += ([[overlayWindow screen] frame].size.height - (wowRect.origin.y + wowRect.size.height));
             //NSLog(@"Found pt in Q1 screen space: %@", NSStringFromPoint(screenPt));
@@ -890,13 +895,13 @@ BOOL _updateDockIcon = YES;
 		 int red = isARGB ? 1 : 0, green = isARGB ? 2 : 1, blue = isARGB ? 3 : 2; */
 		
 		float whiteThreshold = [self whiteThreshold];
-		
-		[wow lockFocus];
-		for (x=0; x<imgWidth; x++) {
+
+        [wow lockFocus];
+        for (x=0; x<imgWidth; x++) {
 			//unsigned char *pixel = data + bytesPerRow*x;
 			for (y=0; y<imgHeight; y++) {
 				NSColor *color = NSReadPixel(NSMakePoint(x, y));
-				
+                
 				if(([color redComponent]   > whiteThreshold) &&
 				   ([color greenComponent] > whiteThreshold) &&
 				   ([color blueComponent]  > whiteThreshold) ) {
@@ -936,9 +941,9 @@ BOOL _updateDockIcon = YES;
 			CGPoint clickPt = CGPointMake(screenPt.x, screenHeight - screenPt.y);
 			
 			// get ahold of the previous mouse position
-			NSPoint nsPreviousPt = [NSEvent mouseLocation];
-			nsPreviousPt.y = screenHeight - nsPreviousPt.y;
-			CGPoint previousPt = CGPointMake(nsPreviousPt.x, nsPreviousPt.y);
+//			NSPoint nsPreviousPt = [NSEvent mouseLocation];
+//			nsPreviousPt.y = screenHeight - nsPreviousPt.y;
+//			CGPoint previousPt = CGPointMake(nsPreviousPt.x, nsPreviousPt.y);
 			
 			CGInhibitLocalEvents(TRUE);
 			// activate WoW if it isn't already
@@ -950,14 +955,14 @@ BOOL _updateDockIcon = YES;
 			NS_DURING {
 				
 				// post a mouse up event to move the mouse into location
-				CGPostMouseEvent(previousPt, FALSE, 2, FALSE, FALSE);
+//				CGPostMouseEvent(previousPt, FALSE, 2, FALSE, FALSE);
 				
 				// create event source
 				if(!_eventSource) _eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
 				
 				// configure the various events
 				CGEventRef moveToBobber = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, clickPt, kCGMouseButtonLeft);
-				CGEventRef moveToPrevPt = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, previousPt, kCGMouseButtonLeft);
+//				CGEventRef moveToPrevPt = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, previousPt, kCGMouseButtonLeft);
 				CGEventRef rightClickDn = CGEventCreateMouseEvent(_eventSource, kCGEventRightMouseDown, clickPt, kCGMouseButtonRight);
 				CGEventRef rightClickUp = CGEventCreateMouseEvent(_eventSource, kCGEventRightMouseUp, clickPt, kCGMouseButtonRight);
 				
@@ -965,7 +970,7 @@ BOOL _updateDockIcon = YES;
 				CGEventSetType(rightClickDn, kCGEventRightMouseDown);
 				CGEventSetType(rightClickUp, kCGEventRightMouseUp);
 				CGEventSetType(moveToBobber, kCGEventMouseMoved);
-				CGEventSetType(moveToPrevPt, kCGEventMouseMoved);
+//				CGEventSetType(moveToPrevPt, kCGEventMouseMoved);
 				
 				// post the mouse events
 				CGEventPostToPSN(&_wowProcess, moveToBobber);
@@ -973,15 +978,14 @@ BOOL _updateDockIcon = YES;
 				CGEventPostToPSN(&_wowProcess, rightClickDn);
 				CGEventPostToPSN(&_wowProcess, rightClickUp);
 				usleep(100000); // wait 0.1 sec
-				CGEventPostToPSN(&_wowProcess, moveToPrevPt);
-				
+//				CGEventPostToPSN(&_wowProcess, moveToPrevPt);
+
 				// release events
 				if(rightClickDn)    CFRelease(rightClickDn); 
 				if(rightClickUp)    CFRelease(rightClickUp); 
 				if(moveToBobber)    CFRelease(moveToBobber);
-				if(moveToPrevPt)    CFRelease(moveToPrevPt);
+//				if(moveToPrevPt)    CFRelease(moveToPrevPt);
 				
-				/*
 				 // old way I did it (works fine though)
 				 CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, clickPt);
 				 
@@ -989,8 +993,7 @@ BOOL _updateDockIcon = YES;
 				 CGPostMouseEvent(clickPt, FALSE, 2, FALSE, FALSE);
 				 
 				 // move the mosue back to where it came from
-				 CGPostMouseEvent(previousPt, TRUE, 1, FALSE);
-				 */
+//				 CGPostMouseEvent(previousPt, TRUE, 1, FALSE);
 				
 			} NS_HANDLER {
 				CGInhibitLocalEvents(FALSE);
@@ -1019,16 +1022,6 @@ BOOL _updateDockIcon = YES;
     [prefWindow orderFrontWithTransition: CGSSwap options: CGSInOut];
     [prefWindow makeKeyAndOrderFront: nil];
     
-}
-
-- (IBAction)registerProduct:(id)sender {
-    if(self.isRegistered)   [registrationText setStringValue: @"Thanks for registering! GoneFishing is registered to:"];
-    else                    [registrationText setStringValue: @"GoneFishing is not registered."];
-
-    if([registerWindow respondsToSelector: @selector(setCollectionBehavior:)])
-        [registerWindow setCollectionBehavior: NSWindowCollectionBehaviorMoveToActiveSpace];
-    [registerWindow makeKeyAndOrderFront: nil];
-    [registerWindow center];
 }
 
 - (IBAction)setFishingModifier:(id)sender {
@@ -1105,4 +1098,5 @@ BOOL _updateDockIcon = YES;
     NSData *pngData = [newRep representationUsingType:NSPNGFileType properties:nil];
     [pngData writeToFile:path atomically:YES];
 }
+
 @end
