@@ -220,7 +220,8 @@ CFArrayRef windowIDsArray = NULL;
 }
 
 + (NSImage *)imageWithScreenShotInRect:(NSRect)cocoaRect {
-	PicHandle picHandle;
+/*
+    PicHandle picHandle;
 	GDHandle mainDevice;
 	Rect rect;
 	
@@ -251,6 +252,16 @@ CFArrayRef windowIDsArray = NULL;
 	NSImage *image = [[NSImage alloc] initWithSize: [pictImageRep size]];
 	[image addRepresentation: pictImageRep];
     return [image autorelease];
+     */
+    
+    NSRect screenRect = [[NSScreen mainScreen] frame];
+    CGImageRef cgImage = CGWindowListCreateImage(cocoaRect, kCGWindowListOptionOnScreenOnly, kCGNullWindowID, kCGWindowImageDefault);
+    NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithCGImage:cgImage];
+    CGImageRelease(cgImage);
+    NSImage *image = [[NSImage alloc] init];
+    [image addRepresentation:rep];
+    return image;
+    
 }
 
 @end

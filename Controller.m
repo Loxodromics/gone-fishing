@@ -332,7 +332,7 @@
 
 - (BOOL)isWoWFront {
 	NSDictionary *frontProcess;
-	if( frontProcess = [[NSWorkspace sharedWorkspace] activeApplication] ) {
+	if( frontProcess == [[NSWorkspace sharedWorkspace] activeApplication] ) {
 		NSString *bundleID = [frontProcess objectForKey: @"NSApplicationBundleIdentifier"];
 		if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
 			return YES;
@@ -381,13 +381,15 @@
     AppleEvent eventReply = {typeNull, NULL}; 
 	
     status = AECreateDesc(typeProcessSerialNumber, &pSN, sizeof(pSN), &targetProcess);
-	require_noerr(status, AECreateDesc);
+    //FIXME
+        __Require_noErr(status, AECreateDesc);
     
     status = AECreateAppleEvent(kCoreEventClass, kAEQuitApplication, &targetProcess, kAutoGenerateReturnID, kAnyTransactionID, &theEvent);
-	require_noerr(status, AECreateAppleEvent);
+//FIXME
+        __Require_noErr(status, AECreateAppleEvent);
     
     status = AESend(&theEvent, &eventReply, kAENoReply + kAEAlwaysInteract, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
-	require_noerr(status, AESend);
+	__Require_noErr(status, AESend);
     
 AESend:;
 AECreateAppleEvent:;
@@ -401,9 +403,10 @@ AECreateDesc:;
 - (void)saveFrontProcess {
 	if( ![self allowFishingInBackground]) return;
 	
+    //FIXME: used to be assignment: if (frontProcess = [[NSWorkspace sharedWorkspace] activeApplication]) {
 	NSDictionary *frontProcess;
-	if( frontProcess = [[NSWorkspace sharedWorkspace] activeApplication] ) {
-		// NSLog(@"Saving front process: %@", frontProcess);
+	if( frontProcess == [[NSWorkspace sharedWorkspace] activeApplication] ) {
+		NSLog(@"Saving front process: %@", frontProcess);
 		_lastFrontProcess.highLongOfPSN = [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberHigh"] longValue];
 		_lastFrontProcess.lowLongOfPSN	= [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberLow"] longValue];
 	} else {
@@ -463,8 +466,9 @@ AECreateDesc:;
             for(i = 0; i < actualIDs; i++) {
 				CGSWindow window = windowList[i];
 				CGSValue windowTitle;
-				CFStringRef titleKey = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, "kCGSWindowTitle", kCFStringEncodingUTF8, kCFAllocatorNull); 
-				err = CGSGetWindowProperty(myConnectionID, window, (int)titleKey, &windowTitle); // CGSCreateCStringNoCopy("kCGSWindowTitle") busted on Leopard
+				CFStringRef titleKey = CFStringCreateWithCStringNoCopy(kCFAllocatorDefault, "kCGSWindowTitle", kCFStringEncodingUTF8, kCFAllocatorNull);
+                //FIXME
+//                err = CGSGetWindowProperty(myConnectionID, window, (int)titleKey, &windowTitle); // CGSCreateCStringNoCopy("kCGSWindowTitle") busted on Leopard
                 if(titleKey) CFRelease(titleKey);
 				if(err == noErr && windowTitle) {
 					return window;
@@ -669,6 +673,7 @@ AECreateDesc:;
         
 		//NSBitmapImageRep *bmWoW = [NSBitmapImageRep bitmapRepWithWindow: windowID];
         NSImage *wow = [NSImage imageWithBitmapRep: [NSBitmapImageRep bitmapRepWithWindow: windowID]];
+        [self saveImage:wow atPath:@"/Users/philipp2/Desktop/wow.png"];
         //[[imageWell window] orderFront: nil];
         //[imageWell setImage: wow];
         //[[imageWell window] display];
@@ -756,8 +761,8 @@ AECreateDesc:;
 							numFound ++;
                         } else {
 							// only count this point if it's within [bobberRadius] pixels of the average
-							if(   abs(x - (foundX / (numFound*1.0f))) < [self bobberRadius]*2.0f
-                               && abs(y - (foundY / (numFound*1.0f))) < [self bobberRadius]*2.0f) {
+							if(   fabsf(x - (foundX / (numFound*1.0f))) < [self bobberRadius]*2.0f
+                               && fabsf(y - (foundY / (numFound*1.0f))) < [self bobberRadius]*2.0f) {
 								
                                 foundX += x;
 								foundY += y;
@@ -1091,4 +1096,13 @@ BOOL _updateDockIcon = YES;
     [prefWindow setFrame: newFrame display: tabView ? YES : NO animate: tabView ? YES : NO];
 }
 
+- (void)saveImage:(NSImage *)image atPath:(NSString *)path {
+    CGImageRef cgRef = [image CGImageForProposedRect:NULL
+                                             context:nil
+                                               hints:nil];
+    NSBitmapImageRep *newRep = [[NSBitmapImageRep alloc] initWithCGImage:cgRef];
+    [newRep setSize:[image size]];   // if you want the same resolution
+    NSData *pngData = [newRep representationUsingType:NSPNGFileType properties:nil];
+    [pngData writeToFile:path atomically:YES];
+}
 @end

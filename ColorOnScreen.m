@@ -20,9 +20,12 @@
 	newPoint.y = [[NSScreen mainScreen] frame].size.height - point.y;
 	
 	// Here's where the magic happens. This grabs the color of the screen at a specific point
-	GetCPixel(newPoint.x, newPoint.y, &color);
+//    GetCPixel(newPoint.x, newPoint.y, &color);
+//    color = NSReadPixel(newPoint);
 	
-	return [self colorFromRGBColor:color];
+//    return [self colorFromRGBColor:color];
+    return NSReadPixel(newPoint);
+
 }
 
 + (NSColor *)colorFromRGBColor:(RGBColor)color
