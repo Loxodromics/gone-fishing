@@ -302,13 +302,13 @@
 	
 	// queue up bobber locater & fishing timer
 	[self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 4.0];
-	[self performSelector: @selector(startFishing:) withObject: nil afterDelay: 22.0];
+	[self performSelector: @selector(startFishing:) withObject: nil afterDelay: 26.0];
 	
 	self.isFishing = YES;
 }
 
 - (void)stopFishing:(id)sender {
-    //NSLog(@"Stop Fishing.");
+    NSLog(@"Stop Fishing.");
 	self.isFishing = NO;
     self.needsToApplyLure = NO;
 	[self resetTimers];
@@ -332,7 +332,7 @@
 
 - (BOOL)isWoWFront {
 	NSDictionary *frontProcess;
-	if( frontProcess == [[NSWorkspace sharedWorkspace] activeApplication] ) {
+	if( frontProcess = [[NSWorkspace sharedWorkspace] activeApplication] ) {
 		NSString *bundleID = [frontProcess objectForKey: @"NSApplicationBundleIdentifier"];
 		if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
 			return YES;
@@ -366,7 +366,7 @@
    //     if(waitCount >= 10) break;
    // }
     usleep(50000);
-    //NSLog(@"Waited for %d ms to activate.", waitCount*10000);
+//    NSLog(@"Waited for %d ms to activate.", waitCount*10000);
 }
 
 - (void)quitWoW {
@@ -381,12 +381,10 @@
     AppleEvent eventReply = {typeNull, NULL}; 
 	
     status = AECreateDesc(typeProcessSerialNumber, &pSN, sizeof(pSN), &targetProcess);
-    //FIXME
-        __Require_noErr(status, AECreateDesc);
+	__Require_noErr(status, AECreateDesc);
     
     status = AECreateAppleEvent(kCoreEventClass, kAEQuitApplication, &targetProcess, kAutoGenerateReturnID, kAnyTransactionID, &theEvent);
-//FIXME
-        __Require_noErr(status, AECreateAppleEvent);
+	__Require_noErr(status, AECreateAppleEvent);
     
     status = AESend(&theEvent, &eventReply, kAENoReply + kAEAlwaysInteract, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
 	__Require_noErr(status, AESend);
@@ -403,9 +401,9 @@ AECreateDesc:;
 - (void)saveFrontProcess {
 	if( ![self allowFishingInBackground]) return;
 	
-    //FIXME: used to be assignment: if (frontProcess = [[NSWorkspace sharedWorkspace] activeApplication]) {
 	NSDictionary *frontProcess;
-	if( frontProcess == [[NSWorkspace sharedWorkspace] activeApplication] ) {
+	//FIXME
+    if( frontProcess = [[NSWorkspace sharedWorkspace] activeApplication] ) {
 		NSLog(@"Saving front process: %@", frontProcess);
 		_lastFrontProcess.highLongOfPSN = [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberHigh"] longValue];
 		_lastFrontProcess.lowLongOfPSN	= [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberLow"] longValue];
@@ -417,7 +415,7 @@ AECreateDesc:;
 
 - (void)restoreFrontProcess {
 	if( [self allowFishingInBackground] ) {
-		// NSLog(@"restoring front process");
+		NSLog(@"restoring front process");
 		SetFrontProcess(&_lastFrontProcess);
 		usleep(50000);
 	}
@@ -428,7 +426,7 @@ AECreateDesc:;
 }
 
 - (ProcessSerialNumber)getWoWProcessSerialNumber {
-	
+
 	ProcessSerialNumber pSN = {kNoProcess, kNoProcess};
 	NSDictionary *processDict;
 	NSEnumerator *enumerator = [[[NSWorkspace sharedWorkspace] launchedApplications] objectEnumerator];
@@ -526,7 +524,7 @@ AECreateDesc:;
 		for(i=0; i<[keySequence length]; i++) {
 			NSString *character = [keySequence substringWithRange: NSMakeRange(i,1)];
 			if( [character isEqualToString: @"\\"]) {
-				// NSLog(@"%@ == %@", character, @"\\");
+				NSLog(@"%@ == %@", character, @"\\");
 				if(++i < [keySequence length])
 					character = [NSString stringWithFormat: @"\\%@", [keySequence substringWithRange: NSMakeRange(i,1)]];
 			}
@@ -534,7 +532,7 @@ AECreateDesc:;
 			if(obj && [obj isKindOfClass: [NSNumber class]]) {
 				BOOL upperCase = ![[character lowercaseString] isEqualToString: character];
 				CGKeyCode keyCode = [obj unsignedIntValue];
-				// NSLog(@"Stroking key %@ (%d) %d", character, keyCode, upperCase);
+				NSLog(@"Stroking key %@ (%d) %d", character, keyCode, upperCase);
 				CGEventRef keyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)keyCode, TRUE);
 				CGEventRef keyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)keyCode, FALSE);
 				if(upperCase)	CGEventPostToPSN(&_wowProcess, sftKeyDn);
@@ -643,7 +641,7 @@ AECreateDesc:;
 
 - (void)triggerLure:(id)timer {
 	self.needsToApplyLure = YES;
-	//NSLog(@"Time to apply another lure");
+	NSLog(@"Time to apply another lure");
 }
 
 - (void)locateBobber:(id)timer {
@@ -661,11 +659,12 @@ AECreateDesc:;
             return;
         }
     }
+    NSDate *start = [NSDate date];
     
     // check if we should pause
 	if([self shouldPause]) return;
     
-	//NSLog(@"Scanning for the bobber.");
+	NSLog(@"Scanning for the bobber.");
 	// get a handle to WoW's window
 	int windowID = [self getWOWWindowID: [self getWoWProcessSerialNumber]];
 	
@@ -694,11 +693,11 @@ AECreateDesc:;
         foundPt = foundPtQ1 = foundPtQ4 = NSZeroPoint;
 		int numFound = 0, foundX=0, foundY=0;
         int imgWidth = [wow size].width, imgHeight = [wow size].height;
-		
+	
 		NSColor *bobberColor = [NSColor clearColor];
-		if(wow) {
-            //NSDate *start = [NSDate date];
-            //NSLog(@"Scanning image: %d x %d", [bmWoW pixelsWide], [bmWoW pixelsHigh]);
+		if (wow) {
+            
+//            NSLog(@"Scanning image: %d x %d", [bmWoW pixelsWide], [bmWoW pixelsHigh]);
             
 			// break our search color into its components
 			bobberColor = [self bobberColor];
@@ -780,16 +779,16 @@ AECreateDesc:;
             }
 			[wow unlockFocus];
 
-            //NSLog(@"Completed scan in %f seconds.", [start timeIntervalSinceNow]*-1.0);
+             NSLog(@"Completed scan in %f seconds.", [start timeIntervalSinceNow]*-1.0);
             foundPt.x = foundX / (numFound*1.0);
             foundPt.y = foundY / (numFound*1.0);
             
             foundPtQ1 = foundPtQ4 = foundPt;
             foundPtQ4.y = imgHeight - foundPtQ1.y;  // Q4 for NSImage, Q1 for NSBitmapImageRep
             
-            //NSLog(@"%d matches for avg loc: %@ in Q1w, %@ in Q4w", numFound, NSStringFromPoint(foundPtQ1), NSStringFromPoint(foundPtQ4));
+            NSLog(@"%d matches for avg loc: %@ in Q1w, %@ in Q4w", numFound, NSStringFromPoint(foundPtQ1), NSStringFromPoint(foundPtQ4));
         } else {
-            // NSLog(@"The image returned for the window appears to be invalid.");
+            NSLog(@"The image returned for the window appears to be invalid.");
         }
         
 		if(numFound >= 3) {
@@ -803,7 +802,7 @@ AECreateDesc:;
             NSPoint screenPt = foundPtQ1;
 			screenPt.x += wowRect.origin.x;
 			screenPt.y += ([[overlayWindow screen] frame].size.height - (wowRect.origin.y + wowRect.size.height));
-            //NSLog(@"Found pt in Q1 screen space: %@", NSStringFromPoint(screenPt));
+            NSLog(@"Found pt in Q1 screen space: %@", NSStringFromPoint(screenPt));
 			// now we have screen point in Q1 space
             
 			// create new window bounds
@@ -838,13 +837,13 @@ AECreateDesc:;
 			// otherwise, restart the bobber scan timer
 			[self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 2.0];
 		}
-		// NSLog(@"Search took %f seconds", [start timeIntervalSinceNow]*-1.0);
+		NSLog(@"Search took %f seconds", [start timeIntervalSinceNow]*-1.0);
 	}
 }
 
 BOOL _updateDockIcon = YES;
 - (void)scanForSplash:(id)timer {
-    //NSDate *start = [NSDate date];
+    NSDate *start = [NSDate date];
 	if([self shouldPause]) return;
     
 	NS_DURING {
@@ -883,7 +882,7 @@ BOOL _updateDockIcon = YES;
 		} else {
 			_updateDockIcon = YES;
 		}
-		
+        
 		// scan the image for a splash
 		int hits = 0, x, y;
 		int imgWidth = [wow size].width, imgHeight = [wow size].height;
@@ -912,17 +911,17 @@ BOOL _updateDockIcon = YES;
 			}
 		}
 		[wow unlockFocus];
-		//NSLog(@"Splash scanc took %f seconds", [start timeIntervalSinceNow]*-1.0);
+		NSLog(@"Splash scanc took %f seconds", [start timeIntervalSinceNow]*-1.0);
 		
 	done:;
 		if(hits)
-			; //NSLog(@"FOUND WHITE COLOR: %d count, %d hits", count, hits);
+            NSLog(@"FOUND WHITE COLOR: %d count, %d hits", count, hits);
 		
 		BOOL enoughWhite = NO;
-		// if(hits) NSLog(@"%d hits; %d count... %.2f", hits, count, count * [self bobberCatchSensitivity]);
+		if(hits) NSLog(@"%d hits; %d count... %.2f", hits, count, count * [self bobberCatchSensitivity]);
 		if(hits >= count * [self bobberCatchSensitivity]) {
 			enoughWhite = YES;
-			//NSLog(@"hits >= %.2f with %.3f", count * [self bobberCatchSensitivity], [self bobberCatchSensitivity]);
+			NSLog(@"hits >= %.2f with %.3f", count * [self bobberCatchSensitivity], [self bobberCatchSensitivity]);
 		}
 		
 		if(enoughWhite) {
