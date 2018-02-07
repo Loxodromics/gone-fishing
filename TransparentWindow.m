@@ -66,25 +66,26 @@
 
 - (void)mouseDown:(NSEvent*)event {
 	if( (_mouseEvents & JXMouseDown))	{
-		if( [[self delegate] respondsToSelector: @selector(mouseDown:inWindow:)] )
-			[[self delegate] mouseDown: event inWindow: self];
-	}
+        //FIXME
+//        if( [[self delegate] respondsToSelector: @selector(mouseDown:inWindow:)] )
+//            [[self delegate] mouseDown: event inWindow: self];
+    }
 	[super mouseDown: event];
 }
 
 - (void)mouseUp:(NSEvent*)event {
 	if( (_mouseEvents & JXMouseUp))	{
-		if( [[self delegate] respondsToSelector: @selector(mouseUp:inWindow:)] )
-			[[self delegate] mouseUp: event inWindow: self];
-	}
+//        if( [[self delegate] respondsToSelector: @selector(mouseUp:inWindow:)] )
+//            [[self delegate] mouseUp: event inWindow: self];
+    }
 	[super mouseUp: event];
 }
 
 - (void)mouseMoved:(NSEvent*)event {
 	if( (_mouseEvents & JXMouseMoved))	{
-		if( [[self delegate] respondsToSelector: @selector(mouseMoved:inWindow:)] ) {
-			[[self delegate] mouseMoved: event inWindow: self];
-		}
+//        if( [[self delegate] respondsToSelector: @selector(mouseMoved:inWindow:)] ) {
+//            [[self delegate] mouseMoved: event inWindow: self];
+//        }
 	}
 	[super mouseMoved: event];
 }

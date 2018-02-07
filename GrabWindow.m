@@ -30,7 +30,7 @@ CFArrayRef windowIDsArray = NULL;
     //[rep bitmapData];
     //return rep;
     
-	return [NSBitmapImageRep imageRepWithData: [rep TIFFRepresentation]]; // [NSImage imageWithBitmapRep: rep] 
+    return [NSBitmapImageRep imageRepWithData: [rep TIFFRepresentation]]; // [NSImage imageWithBitmapRep: rep] 
 
     NSBitmapImageRep *newRep = nil;
     if( [rep bytesPerRow] == 0 ) {
@@ -58,16 +58,16 @@ CFArrayRef windowIDsArray = NULL;
     }
     
     if(newRep)
-        return [newRep autorelease];
-    return [[rep retain] autorelease];
+        return newRep;
+    return rep;
 }
 
 + (NSBitmapImageRep*)bitmapRepFromNSImage:(NSImage*)image {
     if(!image) return nil;
     
-	NSBitmapImageRep *bitmapImageRep = [[NSBitmapImageRep alloc] initWithData: [image TIFFRepresentation]];
+    NSBitmapImageRep *bitmapImageRep = [[NSBitmapImageRep alloc] initWithData: [image TIFFRepresentation]];
     
-	return [bitmapImageRep autorelease];
+    return bitmapImageRep;
 }
 
 
@@ -105,7 +105,7 @@ CFArrayRef windowIDsArray = NULL;
             //[bitmapRep setColorSpaceName: NSCalibratedRGBColorSpace];
             CGImageRelease(windowImage);
             
-            return [bitmapRep autorelease];
+            return bitmapRep;
         }
         else if (MacVersion >= TIGER) {    // we're in Tiger
             
@@ -154,7 +154,7 @@ CFArrayRef windowIDsArray = NULL;
             CGImageRelease(windowImage);
             
             
-            return [NSBitmapImageRep correctBitmap: [bitmapRep autorelease]];
+            return [NSBitmapImageRep correctBitmap: bitmapRep];
         }
         else if (MacVersion >= TIGER) {    // we're in Tiger
             NSImage *windowImage = [NSImage imageWithCGContextCaptureWindow: wid];
@@ -166,7 +166,8 @@ CFArrayRef windowIDsArray = NULL;
                 newRect.origin.y = windowRect.size.height - newRect.origin.y - rect.size.height - 22;
                 [windowImage compositeToPoint: NSZeroPoint fromRect: newRect operation: NSCompositeCopy fraction: 1.0];
                 [sub unlockFocus];
-                [sub autorelease];
+                //FIXME?
+//                [sub autorelease];
             }
             return [NSBitmapImageRep bitmapRepFromNSImage: sub];
         }
@@ -180,7 +181,7 @@ CFArrayRef windowIDsArray = NULL;
 {
     NSImage *image = [NSImage imageWithScreenShotInRect: cocoaRect];
     // convert it to a bitmap rep and return
-	return [NSBitmapImageRep bitmapRepFromNSImage: image];
+    return [NSBitmapImageRep bitmapRepFromNSImage: image];
 }
 
 @end
@@ -195,7 +196,7 @@ CFArrayRef windowIDsArray = NULL;
     image = [[NSImage alloc] init];
     [image addRepresentation: rep];
     
-    return [image autorelease];
+    return image;
 }
 
 + (NSImage*)imageWithCGContextCaptureWindow: (int)wid {
@@ -216,16 +217,17 @@ CFArrayRef windowIDsArray = NULL;
                                              wid, 
                                              0);
     [image unlockFocus];
-    return [image autorelease];
+    return image;
 }
 
 + (NSImage *)imageWithScreenShotInRect:(NSRect)cocoaRect {
-	// Capture the screen into the PicHandle.
+    // Capture the screen into the PicHandle.
     CGImageRef picHandle = CGDisplayCreateImage(kCGDirectMainDisplay);
     CGImageRef croppedImage = CGImageCreateWithImageInRect(picHandle, NSRectToCGRect(cocoaRect));
     NSImage* image = [[NSImage alloc] initWithCGImage:croppedImage size:cocoaRect.size];
     CFRelease(picHandle);
-    return [image autorelease];
+//    CFRelease(croppedImage);
+    return image;
 }
 
 @end

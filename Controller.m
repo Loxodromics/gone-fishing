@@ -10,9 +10,9 @@
 
 // 0.333333 0.14902 0.0823529 (bobber red)
 // 0.737255 0.615686 0.478431 (bobber beige)
-#define RED		0.737255  
-#define GREEN	0.615686   
-#define BLUE	0.478431 
+#define RED        0.737255  
+#define GREEN    0.615686   
+#define BLUE    0.478431 
 #define ERROR   15 /* 0.080 */
 #define ERRORFLT 0.080
 
@@ -97,8 +97,8 @@
         // initialize user defaults
         [self registerUserDefaults];
         
-		// load in the keymap dictionary
-		_keyMap = [[NSDictionary dictionaryWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"CGKeyCodeMap" ofType: @"plist"]] retain];
+        // load in the keymap dictionary
+        _keyMap = [NSDictionary dictionaryWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"CGKeyCodeMap" ofType: @"plist"]];
         
         [self getWoWProcessSerialNumber];
     }
@@ -107,8 +107,6 @@
 
 - (void)dealloc {
     if(_eventSource) CFRelease(_eventSource);
-    [_keyMap release];
-    [super dealloc];
 }
 
 - (void)awakeFromNib {
@@ -138,7 +136,7 @@
         [overlayWindow setCollectionBehavior: NSWindowCollectionBehaviorMoveToActiveSpace];
     }
     
-    [self tabView: nil didSelectTabViewItem: [[[NSTabViewItem alloc] initWithIdentifier: @"1"] autorelease]];
+    [self tabView: nil didSelectTabViewItem: [[NSTabViewItem alloc] initWithIdentifier: @"1"]];
 
     if([prefWindow respondsToSelector: @selector(setCollectionBehavior:)])
         [prefWindow setCollectionBehavior: NSWindowCollectionBehaviorMoveToActiveSpace];
@@ -228,14 +226,14 @@
 }
 
 - (float)whiteThreshold {
-	switch([[[NSUserDefaults standardUserDefaults] objectForKey: @"bobberCatchSensitivity"] intValue]) {
-		case 1:	return 0.91;
-		case 2:	return 0.85;
-		default:
-		case 3:	return 0.75;
-		case 4:	return 0.65;
-		case 5:	return 0.50;
-	}
+    switch([[[NSUserDefaults standardUserDefaults] objectForKey: @"bobberCatchSensitivity"] intValue]) {
+        case 1:    return 0.91;
+        case 2:    return 0.85;
+        default:
+        case 3:    return 0.75;
+        case 4:    return 0.65;
+        case 5:    return 0.50;
+    }
 }
 
 - (float)bobberCatchSensitivity {
@@ -280,83 +278,83 @@
 
 - (void)startFishing:(id)sender {
 
-	_wowProcess = [self getWoWProcessSerialNumber];
+    _wowProcess = [self getWoWProcessSerialNumber];
     [NSApp setApplicationIconImage: [NSImage imageNamed: @"Fishy"]];
-	if(![self isWoWOpen]) {
-		[self stopFishing: nil];
-		[[PrettyError sharedError] displayErrorMessage: @"WoW is not open."];
-		return;
-	}
+    if(![self isWoWOpen]) {
+        [self stopFishing: nil];
+        [[PrettyError sharedError] displayErrorMessage: @"WoW is not open."];
+        return;
+    }
         
     // if we are just starting to fish, set the lure to apply
     if(!self.isFishing) {
         self.needsToApplyLure = YES;
     }
-	
-	[self resetTimers];
-	[overlayWindow makeKeyAndOrderFront: nil];
-	
-	// apple lures & last
-	[self applyLure];
-	[self cast];
-	
-	// queue up bobber locater & fishing timer
-	[self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 4.0];
-	[self performSelector: @selector(startFishing:) withObject: nil afterDelay: 26.0];
-	
-	self.isFishing = YES;
+    
+    [self resetTimers];
+    [overlayWindow makeKeyAndOrderFront: nil];
+    
+    // apple lures & last
+    [self applyLure];
+    [self cast];
+    
+    // queue up bobber locater & fishing timer
+    [self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 4.0];
+    [self performSelector: @selector(startFishing:) withObject: nil afterDelay: 26.0];
+    
+    self.isFishing = YES;
 }
 
 - (void)stopFishing:(id)sender {
     NSLog(@"Stop Fishing.");
-	self.isFishing = NO;
+    self.isFishing = NO;
     self.needsToApplyLure = NO;
-	[self resetTimers];
+    [self resetTimers];
     [NSApp setApplicationIconImage: [NSImage imageNamed: @"Fishy"]];
-	[NSObject cancelPreviousPerformRequestsWithTarget: self];
-	[overlayWindow orderOut: nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget: self];
+    [overlayWindow orderOut: nil];
 }
 
 
 - (void)resetTimers {
 
-	[focusView fadeOut];
-	[NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(locateBobber:) object: nil];
-	[NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(startFishing:) object: nil];
-	
-	[_findSplashTimer invalidate];	_findSplashTimer = nil;
+    [focusView fadeOut];
+    [NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(locateBobber:) object: nil];
+    [NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(startFishing:) object: nil];
+    
+    [_findSplashTimer invalidate];    _findSplashTimer = nil;
 }
 
 
 #pragma mark Process & Window Functions
 
 - (BOOL)isWoWFront {
-	NSDictionary *frontProcess;
-	if( frontProcess = [[NSWorkspace sharedWorkspace] activeApplication] ) {
-		NSString *bundleID = [frontProcess objectForKey: @"NSApplicationBundleIdentifier"];
-		if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
-			return YES;
-		}
-	}
-	return NO;
+    NSDictionary *frontProcess = [[NSWorkspace sharedWorkspace] activeApplication];
+    if ( frontProcess ) {
+        NSString *bundleID = [frontProcess objectForKey: @"NSApplicationBundleIdentifier"];
+        if ( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (BOOL)isWoWOpen {
 
-	NSDictionary *processDict;
-	NSEnumerator *enumerator = [[[NSWorkspace sharedWorkspace] launchedApplications] objectEnumerator];
-	while(processDict = [enumerator nextObject]) {
-		NSString *bundleID = [processDict objectForKey: @"NSApplicationBundleIdentifier"];
-		if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
-			return YES;
-		}
-	}
-	return NO;
+    NSDictionary *processDict;
+    NSEnumerator *enumerator = [[[NSWorkspace sharedWorkspace] launchedApplications] objectEnumerator];
+    while(processDict = [enumerator nextObject]) {
+        NSString *bundleID = [processDict objectForKey: @"NSApplicationBundleIdentifier"];
+        if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
+            return YES;
+        }
+    }
+    return NO;
 }
 
 - (void)activateWoW {
-	//[chatWindow resignKeyWindow];
-	SetFrontProcess( &_wowProcess );
+    //[chatWindow resignKeyWindow];
+    SetFrontProcess( &_wowProcess );
     //ProcessSerialNumber curProcess = {0, 0};
     //int waitCount = 0;
     //while( !IsProcessVisible(&_wowProcess) ) {
@@ -379,78 +377,78 @@
     AEDesc targetProcess = {typeNull, NULL};
     AppleEvent theEvent = {typeNull, NULL};
     AppleEvent eventReply = {typeNull, NULL}; 
-	
+    
     status = AECreateDesc(typeProcessSerialNumber, &pSN, sizeof(pSN), &targetProcess);
-	__Require_noErr(status, AECreateDesc);
+    __Require_noErr(status, AECreateDesc);
     
     status = AECreateAppleEvent(kCoreEventClass, kAEQuitApplication, &targetProcess, kAutoGenerateReturnID, kAnyTransactionID, &theEvent);
-	__Require_noErr(status, AECreateAppleEvent);
+    __Require_noErr(status, AECreateAppleEvent);
     
     status = AESend(&theEvent, &eventReply, kAENoReply + kAEAlwaysInteract, kAENormalPriority, kAEDefaultTimeout, NULL, NULL);
-	__Require_noErr(status, AESend);
+    __Require_noErr(status, AESend);
     
 AESend:;
 AECreateAppleEvent:;
 AECreateDesc:;
-	
-	AEDisposeDesc(&eventReply); 
+    
+    AEDisposeDesc(&eventReply); 
     AEDisposeDesc(&theEvent);
-	AEDisposeDesc(&targetProcess);
+    AEDisposeDesc(&targetProcess);
 }
 
 - (void)saveFrontProcess {
-	if( ![self allowFishingInBackground]) return;
-	
-	NSDictionary *frontProcess;
-	//FIXME
-    if( frontProcess = [[NSWorkspace sharedWorkspace] activeApplication] ) {
-		NSLog(@"Saving front process: %@", frontProcess);
-		_lastFrontProcess.highLongOfPSN = [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberHigh"] longValue];
-		_lastFrontProcess.lowLongOfPSN	= [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberLow"] longValue];
-	} else {
-		_lastFrontProcess.highLongOfPSN = kNoProcess;
-		_lastFrontProcess.lowLongOfPSN	= kNoProcess;
-	}
+    if( ![self allowFishingInBackground]) return;
+    
+    NSDictionary *frontProcess = [[NSWorkspace sharedWorkspace] activeApplication];
+    //FIXME
+    if ( frontProcess ) {
+        NSLog(@"Saving front process: %@", frontProcess);
+        _lastFrontProcess.highLongOfPSN = [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberHigh"] longValue];
+        _lastFrontProcess.lowLongOfPSN    = [[frontProcess objectForKey: @"NSApplicationProcessSerialNumberLow"] longValue];
+    } else {
+        _lastFrontProcess.highLongOfPSN = kNoProcess;
+        _lastFrontProcess.lowLongOfPSN    = kNoProcess;
+    }
 }
 
 - (void)restoreFrontProcess {
-	if( [self allowFishingInBackground] ) {
-		NSLog(@"restoring front process");
-		SetFrontProcess(&_lastFrontProcess);
-		usleep(50000);
-	}
-	//if( [chatWindow isVisible]) {
-	//	[NSApp activateIgnoringOtherApps: YES];
-	//	[chatWindow makeKeyAndOrderFront: nil];
-	//}
+    if( [self allowFishingInBackground] ) {
+        NSLog(@"restoring front process");
+        SetFrontProcess(&_lastFrontProcess);
+        usleep(50000);
+    }
+    //if( [chatWindow isVisible]) {
+    //    [NSApp activateIgnoringOtherApps: YES];
+    //    [chatWindow makeKeyAndOrderFront: nil];
+    //}
 }
 
 - (ProcessSerialNumber)getWoWProcessSerialNumber {
 
-	ProcessSerialNumber pSN = {kNoProcess, kNoProcess};
-	NSDictionary *processDict;
-	NSEnumerator *enumerator = [[[NSWorkspace sharedWorkspace] launchedApplications] objectEnumerator];
-	while(processDict = [enumerator nextObject]) {
-		NSString *bundleID = [processDict objectForKey: @"NSApplicationBundleIdentifier"];
-		if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
-			pSN.highLongOfPSN = [[processDict objectForKey: @"NSApplicationProcessSerialNumberHigh"] longValue];
-			pSN.lowLongOfPSN  = [[processDict objectForKey: @"NSApplicationProcessSerialNumberLow"] longValue];
-			_wowProcess = pSN;
-			return pSN;
-		}
-	}
-	return pSN;
+    ProcessSerialNumber pSN = {kNoProcess, kNoProcess};
+    NSDictionary *processDict;
+    NSEnumerator *enumerator = [[[NSWorkspace sharedWorkspace] launchedApplications] objectEnumerator];
+    while(processDict = [enumerator nextObject]) {
+        NSString *bundleID = [processDict objectForKey: @"NSApplicationBundleIdentifier"];
+        if( [bundleID isEqualToString: @"com.blizzard.worldofwarcraft"] ) {
+            pSN.highLongOfPSN = [[processDict objectForKey: @"NSApplicationProcessSerialNumberHigh"] longValue];
+            pSN.lowLongOfPSN  = [[processDict objectForKey: @"NSApplicationProcessSerialNumberLow"] longValue];
+            _wowProcess = pSN;
+            return pSN;
+        }
+    }
+    return pSN;
 }
 
 -(int)getWOWWindowID:(ProcessSerialNumber)pSN {
-	CGError err = 0;
-	int count = 0;
-	CGSConnection connectionID = 0;
-	CGSConnection myConnectionID = _CGSDefaultConnection();
-	
+    CGError err = 0;
+    int count = 0;
+    CGSConnection connectionID = 0;
+    CGSConnection myConnectionID = _CGSDefaultConnection();
+    
     err = CGSGetConnectionIDForPSN(0, &pSN, &connectionID);
     if( err == noErr ) {
-	
+    
         err = CGSGetOnScreenWindowCount(myConnectionID, connectionID, &count);
         if( (err == noErr) && (count > 0) ) {
             int windowList[count];
@@ -459,8 +457,8 @@ AECreateDesc:;
 
             err = CGSGetOnScreenWindowList(myConnectionID, connectionID, count, windowList, &actualIDs);
             for(i = 0; i < actualIDs; i++) {
-				CGSWindow window = windowList[i];
-				NSString *windowTitle = NULL;
+                CGSWindow window = windowList[i];
+                NSString *windowTitle = NULL;
                 
                 uint32_t windowid[1] = {window};
                 CFArrayRef windowArray = CFArrayCreate ( NULL, (const void **)windowid, 1 ,NULL);
@@ -469,99 +467,99 @@ AECreateDesc:;
                 if(CFDictionaryContainsKey(windowdescription, kCGWindowName))
                 {
                     CFStringRef windowName = CFDictionaryGetValue(windowdescription, kCGWindowName);
-                    windowTitle = (NSString*)windowName;
+                    windowTitle = (__bridge NSString *)windowName;
                 }
                 CFRelease(windowArray);
                 
-				if(err == noErr && windowTitle) {
-					return window;
-				}
+                if(err == noErr && windowTitle) {
+                    return window;
+                }
             }
         }
     }
-	return 0;
+    return 0;
 }
 
 #pragma mark Keystroke Functions
 
 - (void)sendKeySequence:(NSString*)keySequence withModifier: (unsigned)modifierMask {
-	[self getWoWProcessSerialNumber];
-	CFRelease(CGEventCreate(NULL));		// hack to make CGEventCreateKeyboardEvent work... don't ask me
-	NS_DURING {
-		CGInhibitLocalEvents(TRUE);
-		
-		// hit any specified modifier keys
-		CGEventRef cmdKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)55, TRUE);
-		CGEventRef cmdKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)55, FALSE);
-		if(cmdKeyDn && cmdKeyUp) {
+    [self getWoWProcessSerialNumber];
+    CFRelease(CGEventCreate(NULL));        // hack to make CGEventCreateKeyboardEvent work... don't ask me
+    NS_DURING {
+        CGInhibitLocalEvents(TRUE);
+        
+        // hit any specified modifier keys
+        CGEventRef cmdKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)55, TRUE);
+        CGEventRef cmdKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)55, FALSE);
+        if(cmdKeyDn && cmdKeyUp) {
             if(modifierMask & NSCommandKeyMask)
                 CGEventPostToPSN(&_wowProcess, cmdKeyDn);
         }
         
-		CGEventRef altKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)58, TRUE);
-		CGEventRef altKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)58, FALSE);
-		if(altKeyDn && altKeyUp) {
+        CGEventRef altKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)58, TRUE);
+        CGEventRef altKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)58, FALSE);
+        if(altKeyDn && altKeyUp) {
             if(modifierMask & NSAlternateKeyMask)
                 CGEventPostToPSN(&_wowProcess, altKeyDn);
         }
         
-		CGEventRef sftKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)56, TRUE);
-		CGEventRef sftKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)56, FALSE);
-		if(sftKeyDn && sftKeyUp) {
+        CGEventRef sftKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)56, TRUE);
+        CGEventRef sftKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)56, FALSE);
+        if(sftKeyDn && sftKeyUp) {
             if(modifierMask & NSShiftKeyMask)
                 CGEventPostToPSN(&_wowProcess, sftKeyDn);
         }
         
-		CGEventRef ctlKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)59, TRUE);
-		CGEventRef ctlKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)59, FALSE);
-		if(ctlKeyDn && ctlKeyUp) {
+        CGEventRef ctlKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)59, TRUE);
+        CGEventRef ctlKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)59, FALSE);
+        if(ctlKeyDn && ctlKeyUp) {
             if(modifierMask & NSControlKeyMask)
                 CGEventPostToPSN(&_wowProcess, ctlKeyDn);
         }
-		
-		// post the key events
-		unsigned i;
-		for(i=0; i<[keySequence length]; i++) {
-			NSString *character = [keySequence substringWithRange: NSMakeRange(i,1)];
-			if( [character isEqualToString: @"\\"]) {
-				NSLog(@"%@ == %@", character, @"\\");
-				if(++i < [keySequence length])
-					character = [NSString stringWithFormat: @"\\%@", [keySequence substringWithRange: NSMakeRange(i,1)]];
-			}
-			id obj = [_keyMap objectForKey: [character lowercaseString]];
-			if(obj && [obj isKindOfClass: [NSNumber class]]) {
-				BOOL upperCase = ![[character lowercaseString] isEqualToString: character];
-				CGKeyCode keyCode = [obj unsignedIntValue];
-				NSLog(@"Stroking key %@ (%d) %d", character, keyCode, upperCase);
-				CGEventRef keyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)keyCode, TRUE);
-				CGEventRef keyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)keyCode, FALSE);
-				if(upperCase)	CGEventPostToPSN(&_wowProcess, sftKeyDn);
-				CGEventPostToPSN(&_wowProcess, keyDn);
-				CGEventPostToPSN(&_wowProcess, keyUp);
-				if(upperCase)	CGEventPostToPSN(&_wowProcess, sftKeyUp);
-				
-				if(keyDn) CFRelease(keyDn);
+        
+        // post the key events
+        unsigned i;
+        for(i=0; i<[keySequence length]; i++) {
+            NSString *character = [keySequence substringWithRange: NSMakeRange(i,1)];
+            if( [character isEqualToString: @"\\"]) {
+                NSLog(@"%@ == %@", character, @"\\");
+                if(++i < [keySequence length])
+                    character = [NSString stringWithFormat: @"\\%@", [keySequence substringWithRange: NSMakeRange(i,1)]];
+            }
+            id obj = [_keyMap objectForKey: [character lowercaseString]];
+            if(obj && [obj isKindOfClass: [NSNumber class]]) {
+                BOOL upperCase = ![[character lowercaseString] isEqualToString: character];
+                CGKeyCode keyCode = [obj unsignedIntValue];
+                NSLog(@"Stroking key %@ (%d) %d", character, keyCode, upperCase);
+                CGEventRef keyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)keyCode, TRUE);
+                CGEventRef keyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)keyCode, FALSE);
+                if(upperCase)    CGEventPostToPSN(&_wowProcess, sftKeyDn);
+                CGEventPostToPSN(&_wowProcess, keyDn);
+                CGEventPostToPSN(&_wowProcess, keyUp);
+                if(upperCase)    CGEventPostToPSN(&_wowProcess, sftKeyUp);
+                
+                if(keyDn) CFRelease(keyDn);
                 if(keyUp) CFRelease(keyUp);
-			}
-		}
-		
-		// undo the modifier keys
-		if( modifierMask & NSControlKeyMask)	CGEventPostToPSN(&_wowProcess, ctlKeyUp);
-		if( modifierMask & NSShiftKeyMask)		CGEventPostToPSN(&_wowProcess, sftKeyUp);
-		if( modifierMask & NSAlternateKeyMask)	CGEventPostToPSN(&_wowProcess, altKeyUp);
-		if( modifierMask & NSCommandKeyMask)	CGEventPostToPSN(&_wowProcess, cmdKeyUp);
-		
-		// release modifier events
-		if(cmdKeyDn) CFRelease(cmdKeyDn);
+            }
+        }
+        
+        // undo the modifier keys
+        if( modifierMask & NSControlKeyMask)    CGEventPostToPSN(&_wowProcess, ctlKeyUp);
+        if( modifierMask & NSShiftKeyMask)        CGEventPostToPSN(&_wowProcess, sftKeyUp);
+        if( modifierMask & NSAlternateKeyMask)    CGEventPostToPSN(&_wowProcess, altKeyUp);
+        if( modifierMask & NSCommandKeyMask)    CGEventPostToPSN(&_wowProcess, cmdKeyUp);
+        
+        // release modifier events
+        if(cmdKeyDn) CFRelease(cmdKeyDn);
         if(cmdKeyUp) CFRelease(cmdKeyUp);
-		if(altKeyDn) CFRelease(altKeyDn); 
+        if(altKeyDn) CFRelease(altKeyDn); 
         if(altKeyUp) CFRelease(altKeyUp);
-		if(sftKeyDn) CFRelease(sftKeyDn); 
+        if(sftKeyDn) CFRelease(sftKeyDn); 
         if(sftKeyUp) CFRelease(sftKeyUp);
-		if(ctlKeyDn) CFRelease(ctlKeyDn); 
+        if(ctlKeyDn) CFRelease(ctlKeyDn); 
         if(ctlKeyUp) CFRelease(ctlKeyUp);
-		
-		CGInhibitLocalEvents(FALSE);
+        
+        CGInhibitLocalEvents(FALSE);
     } NS_HANDLER {
         NSLog(@"Error during sendKeySequence: %@", keySequence);
         CGInhibitLocalEvents(FALSE);
@@ -569,9 +567,9 @@ AECreateDesc:;
 }
 
 - (void)toggleInterface {
-	if( [self shouldKeepInterfaceVisible] ) {
-		[self sendKeySequence: @"z" withModifier: NSAlternateKeyMask];
-	}
+    if( [self shouldKeepInterfaceVisible] ) {
+        [self sendKeySequence: @"z" withModifier: NSAlternateKeyMask];
+    }
 }
 
 - (void)cast {
@@ -590,13 +588,13 @@ AECreateDesc:;
         return;
     }
     
-	[self sendKeySequence: [hotkey substringToIndex: 1] withModifier: modifier];
+    [self sendKeySequence: [hotkey substringToIndex: 1] withModifier: modifier];
 }
 
 
 - (void)applyLure {
-	if(self.needsToApplyLure && [self shouldApplyLures]) {
-		self.needsToApplyLure = NO;
+    if(self.needsToApplyLure && [self shouldApplyLures]) {
+        self.needsToApplyLure = NO;
         
         NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
         // click the lure
@@ -633,15 +631,15 @@ AECreateDesc:;
         
         int extraTime = SSRandomIntBetween(4.0, 8.0);
         [self performSelector: @selector(triggerLure:) withObject: nil afterDelay: (([self lureInterval] * 60.0) + extraTime)];
-	}
+    }
 }
 
 #pragma mark Fishing Callbacks
 
 
 - (void)triggerLure:(id)timer {
-	self.needsToApplyLure = YES;
-	NSLog(@"Time to apply another lure");
+    self.needsToApplyLure = YES;
+    NSLog(@"Time to apply another lure");
 }
 
 - (void)locateBobber:(id)timer {
@@ -662,49 +660,49 @@ AECreateDesc:;
     NSDate *start = [NSDate date];
     
     // check if we should pause
-	if([self shouldPause]) return;
+    if([self shouldPause]) return;
     
-	NSLog(@"Scanning for the bobber.");
-	// get a handle to WoW's window
-	int windowID = [self getWOWWindowID: [self getWoWProcessSerialNumber]];
-	
-	if(windowID) {
-		// hide the WoW Interface
-		if( [self shouldKeepInterfaceVisible] ) {
-			[self toggleInterface];
-			usleep(200000);
-		}
+    NSLog(@"Scanning for the bobber.");
+    // get a handle to WoW's window
+    int windowID = [self getWOWWindowID: [self getWoWProcessSerialNumber]];
+    
+    if(windowID) {
+        // hide the WoW Interface
+        if( [self shouldKeepInterfaceVisible] ) {
+            [self toggleInterface];
+            usleep(200000);
+        }
         
-		//NSBitmapImageRep *bmWoW = [NSBitmapImageRep bitmapRepWithWindow: windowID];
+        //NSBitmapImageRep *bmWoW = [NSBitmapImageRep bitmapRepWithWindow: windowID];
         NSImage *wow = [NSImage imageWithBitmapRep: [NSBitmapImageRep bitmapRepWithWindow: windowID]];
-        [self saveImage:wow atPath:@"/Users/philipp2/Desktop/wow.png"];
+        [self saveImage: wow atPath:@"/Users/philipp2/Desktop/wow.png"];
         //[[imageWell window] orderFront: nil];
         //[imageWell setImage: wow];
         //[[imageWell window] display];
-        //NSLog(@"Got WoW image: %@", wow);
-		
-		// restore the current process state
-		if( [self shouldKeepInterfaceVisible] ) { 
-			[self toggleInterface];
-		}
-		
-		// search for the bobber
-		NSPoint foundPt, foundPtQ1, foundPtQ4;
+        // NSLog(@"Got WoW image: %@", wow);
+        
+        // restore the current process state
+        if( [self shouldKeepInterfaceVisible] ) { 
+            [self toggleInterface];
+        }
+        
+        // search for the bobber
+        NSPoint foundPt, foundPtQ1, foundPtQ4;
         foundPt = foundPtQ1 = foundPtQ4 = NSZeroPoint;
-		int numFound = 0, foundX=0, foundY=0;
+        int numFound = 0, foundX=0, foundY=0;
         int imgWidth = [wow size].width, imgHeight = [wow size].height;
-	
-		NSColor *bobberColor = [NSColor clearColor];
-		if (wow) {
+    
+        NSColor *bobberColor = [NSColor clearColor];
+        if (wow) {
             
 //            NSLog(@"Scanning image: %d x %d", [bmWoW pixelsWide], [bmWoW pixelsHigh]);
             
-			// break our search color into its components
-			bobberColor = [self bobberColor];
-			float bobberRed	= [bobberColor redComponent];//*255;
-			float bobberGreen	= [bobberColor greenComponent];//*255;
-			float bobberBlue	= [bobberColor blueComponent];//*255;
-			
+            // break our search color into its components
+            bobberColor = [self bobberColor];
+            float bobberRed    = [bobberColor redComponent];//*255;
+            float bobberGreen    = [bobberColor greenComponent];//*255;
+            float bobberBlue    = [bobberColor blueComponent];//*255;
+            
             // -----------
             int x, y;
             // the bitmap scanning version of this code
@@ -737,13 +735,13 @@ AECreateDesc:;
                 }
              }*/
             
-			[wow lockFocus];
+            [wow lockFocus];
             float red, green, blue;
             // this search is over Q4 window space
             for (y=0; y<imgHeight; y+=2) {
                 
                 //NSColor *color = NSReadPixel(NSMakePoint(111, 111));
-                //red	= [color redComponent];
+                //red    = [color redComponent];
                 //green = [color greenComponent];
                 //blue = [color blueComponent];
                 //NSLog(@"Got Red: %f, Green: %f, Blue: %f", red, green, blue);
@@ -751,33 +749,33 @@ AECreateDesc:;
                 
                 // unsigned char *pixel = data + bytesPerRow*y;
                 for (x=0; x<imgWidth; x+=2) {
-					NSColor *color = NSReadPixel(NSMakePoint(x, y));
-					red	= [color redComponent];
-					green = [color greenComponent];
-					blue = [color blueComponent];
+                    NSColor *color = NSReadPixel(NSMakePoint(x, y));
+                    red    = [color redComponent];
+                    green = [color greenComponent];
+                    blue = [color blueComponent];
                     
-					if((red > (bobberRed - ERRORFLT) && red < (bobberRed + ERRORFLT)) 
-					   && (green > (bobberGreen - ERRORFLT) && green < (bobberGreen + ERRORFLT)) 
-					   && (blue > (bobberBlue - ERRORFLT) && blue < (bobberBlue + ERRORFLT)) ) {
+                    if((red > (bobberRed - ERRORFLT) && red < (bobberRed + ERRORFLT)) 
+                       && (green > (bobberGreen - ERRORFLT) && green < (bobberGreen + ERRORFLT)) 
+                       && (blue > (bobberBlue - ERRORFLT) && blue < (bobberBlue + ERRORFLT)) ) {
                         
-						if(!foundX && !foundY) {
-							foundX = x; foundY = y;
-							numFound ++;
+                        if(!foundX && !foundY) {
+                            foundX = x; foundY = y;
+                            numFound ++;
                         } else {
-							// only count this point if it's within [bobberRadius] pixels of the average
-							if(   fabsf(x - (foundX / (numFound*1.0f))) < [self bobberRadius]*2.0f
+                            // only count this point if it's within [bobberRadius] pixels of the average
+                            if(   fabsf(x - (foundX / (numFound*1.0f))) < [self bobberRadius]*2.0f
                                && fabsf(y - (foundY / (numFound*1.0f))) < [self bobberRadius]*2.0f) {
-								
+                                
                                 foundX += x;
-								foundY += y;
-								numFound ++;
-							} else { ; }
-						}
-					}
+                                foundY += y;
+                                numFound ++;
+                            } else { ; }
+                        }
+                    }
                     //pixel += samplesPerPixel + samplesPerPixel; // since we are skipping over 2 pixels at a time
                 }
             }
-			[wow unlockFocus];
+            [wow unlockFocus];
 
              NSLog(@"Completed scan in %f seconds.", [start timeIntervalSinceNow]*-1.0);
             foundPt.x = foundX / (numFound*1.0);
@@ -791,229 +789,229 @@ AECreateDesc:;
             NSLog(@"The image returned for the window appears to be invalid.");
         }
         
-		if(numFound >= 3) {
-			foundPtQ1.x = foundPtQ4.x = (foundPtQ1.x / 1.0) + [self bobberOffsetX];
-			foundPtQ1.y += [self bobberOffsetY];  // since it's in Q1
+        if(numFound >= 3) {
+            foundPtQ1.x = foundPtQ4.x = (foundPtQ1.x / 1.0) + [self bobberOffsetX];
+            foundPtQ1.y += [self bobberOffsetY];  // since it's in Q1
 //            foundPtQ4.y /= 2.0;
-			foundPtQ4.y -= [self bobberOffsetY];  // since it's in Q4
+            foundPtQ4.y -= [self bobberOffsetY];  // since it's in Q4
             
-			// get the point in the window to a point on the screen
-			CGRect wowRect;
-			CGSGetWindowBounds(_CGSDefaultConnection(), windowID, &wowRect);
+            // get the point in the window to a point on the screen
+            CGRect wowRect;
+            CGSGetWindowBounds(_CGSDefaultConnection(), windowID, &wowRect);
             NSPoint screenPt = foundPtQ1;
-			screenPt.x += wowRect.origin.x;
-			screenPt.y += ([[overlayWindow screen] frame].size.height - (wowRect.origin.y + wowRect.size.height));
+            screenPt.x += wowRect.origin.x;
+            screenPt.y += ([[overlayWindow screen] frame].size.height - (wowRect.origin.y + wowRect.size.height));
             
 
             NSLog(@"Found pt in Q1 screen space: %@", NSStringFromPoint(screenPt));
-			// now we have screen point in Q1 space
+            // now we have screen point in Q1 space
             
 
-			// create new window bounds
-			NSRect newRect = NSZeroRect;
+            // create new window bounds
+            NSRect newRect = NSZeroRect;
             newRect.origin = screenPt;
 //            newRect.origin.x = screenPt.x/2.0;
 //            newRect.origin.y = screenPt.y/2.0;
-			newRect = NSInsetRect(newRect, ([self bobberRadius]+20)*-1.0, ([self bobberRadius]+20)*-1.0);
-			[overlayWindow setFrame: newRect display: YES];
+            newRect = NSInsetRect(newRect, ([self bobberRadius]+20)*-1.0, ([self bobberRadius]+20)*-1.0);
+            [overlayWindow setFrame: newRect display: YES];
             
             [focusView setFocusRadius: [self bobberRadius]];
-			[focusView setFocusColor: bobberColor];
-			[focusView setFocusPoint: NSMakePoint(newRect.size.width / 2.0, newRect.size.height / 2.0)];
-			if([self isWoWFront])	[focusView fadeIn];
-			else					[focusView pulse];
+            [focusView setFocusColor: bobberColor];
+            [focusView setFocusPoint: NSMakePoint(newRect.size.width / 2.0, newRect.size.height / 2.0)];
+            if([self isWoWFront])    [focusView fadeIn];
+            else                    [focusView pulse];
             [focusView setNeedsDisplay: YES];
-			
-			// setup the splash scan timer
-			//NSDictionary *windowPtDict = [self dictionaryFromPoint: foundPtQ4];
-			//NSDictionary *screenPtDict = [self dictionaryFromPoint: screenPt];
-			NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity: 4];
-			[userInfo setObject: [NSValue valueWithPoint: foundPtQ4] forKey: @"WindowPoint"];
-			[userInfo setObject: [NSValue valueWithPoint: screenPt] forKey: @"ScreenPoint"];
-			[userInfo setObject: [NSNumber numberWithInt: windowID] forKey: @"WindowID"];
-			[userInfo setObject: [NSNumber numberWithInt: numFound] forKey: @"Count"];
+            
+            // setup the splash scan timer
+            //NSDictionary *windowPtDict = [self dictionaryFromPoint: foundPtQ4];
+            //NSDictionary *screenPtDict = [self dictionaryFromPoint: screenPt];
+            NSMutableDictionary *userInfo = [NSMutableDictionary dictionaryWithCapacity: 4];
+            [userInfo setObject: [NSValue valueWithPoint: foundPtQ4] forKey: @"WindowPoint"];
+            [userInfo setObject: [NSValue valueWithPoint: screenPt] forKey: @"ScreenPoint"];
+            [userInfo setObject: [NSNumber numberWithInt: windowID] forKey: @"WindowID"];
+            [userInfo setObject: [NSNumber numberWithInt: numFound] forKey: @"Count"];
             
             NSLog(@"ScreenPoint: %@", NSStringFromPoint(screenPt));
             NSLog(@"WindowPoint: %@", NSStringFromPoint(foundPtQ4));
-			
-			// and off it goes
-			_findSplashTimer = [NSTimer scheduledTimerWithTimeInterval: 0.05 
-																target: self 
-															  selector: @selector(scanForSplash:) 
-															  userInfo: userInfo
-															   repeats: YES];
-		} else {
-			// otherwise, restart the bobber scan timer
-			[self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 2.0];
-		}
-		NSLog(@"Search took %f seconds", [start timeIntervalSinceNow]*-1.0);
-	}
+            
+            // and off it goes
+            _findSplashTimer = [NSTimer scheduledTimerWithTimeInterval: 0.05 
+                                                                target: self 
+                                                              selector: @selector(scanForSplash:) 
+                                                              userInfo: userInfo
+                                                               repeats: YES];
+        } else {
+            // otherwise, restart the bobber scan timer
+            [self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 2.0];
+        }
+        NSLog(@"Search took %f seconds", [start timeIntervalSinceNow]*-1.0);
+    }
 }
 
 BOOL _updateDockIcon = YES;
 - (void)scanForSplash:(id)timer {
     NSDate *start = [NSDate date];
-	if([self shouldPause]) return;
+    if([self shouldPause]) return;
     
-	NS_DURING {
-		BOOL wowIsFront		= [self isWoWFront];
-		BOOL allowFishInBG	= [self allowFishingInBackground];
-		// [overlayWindow setIsVisible: wowIsFront];
-		if(!wowIsFront && !allowFishInBG)	return;
-		
-		// are we fishing in the background?
-		BOOL fishInBG = (!wowIsFront && allowFishInBG) ? YES : NO; //[bobberFishInBG state] ? YES : NO;
-		
-		// get number of color matches on the bobber and WoW's WindowID
-		int count	  = [[[timer userInfo] objectForKey: @"Count"] intValue];
-		int windowID  = [[[timer userInfo] objectForKey: @"WindowID"] intValue];
-		
-		// get our bobber position
-		NSPoint screenPt = [[[timer userInfo] objectForKey: @"ScreenPoint"] pointValue];
-		NSPoint windowPt = [[[timer userInfo] objectForKey: @"WindowPoint"] pointValue];
-		NSPoint thePoint = fishInBG ? windowPt : screenPt;
-		
-		// determine our bobber scan rect
-		NSRect bobberArea = NSZeroRect; bobberArea.origin = thePoint;
-		if(!fishInBG) bobberArea.origin.y = [[overlayWindow screen] frame].size.height - bobberArea.origin.y;
-		float radius = [self bobberRadius]*-1.0;
-		bobberArea = NSInsetRect(bobberArea, radius, radius);
-		
-		// fishing in background              ?         use CoreGraphics to get the window (medium speed)           :              use QuickDraw (fast)
-		//NSBitmapImageRep *bmBobber = fishInBG ? [NSBitmapImageRep bitmapRepWithRect: bobberArea inWindow: windowID] : [NSBitmapImageRep bitmapRepWithScreenShotInRect: bobberArea];
-		NSImage *wow = fishInBG ? [NSImage imageWithBitmapRep: [NSBitmapImageRep bitmapRepWithRect: bobberArea inWindow: windowID]] : [NSImage imageWithScreenShotInRect: bobberArea];
-		if(!wow) return;
-		
-		// alternate updating the dock icon
-		if(_updateDockIcon) {
-			[NSApp setApplicationIconImage: wow];
-			_updateDockIcon = NO;
-		} else {
-			_updateDockIcon = YES;
-		}
+    NS_DURING {
+        BOOL wowIsFront        = [self isWoWFront];
+        BOOL allowFishInBG    = [self allowFishingInBackground];
+        // [overlayWindow setIsVisible: wowIsFront];
+        if(!wowIsFront && !allowFishInBG)    return;
         
-		// scan the image for a splash
-		int hits = 0, x, y;
-		int imgWidth = [wow size].width, imgHeight = [wow size].height;
-		/*
-		 unsigned char *data = [bmBobber bitmapData];
-		 int imgWidth = [bmBobber pixelsWide], imgHeight = [bmBobber pixelsHigh];
-		 int samplesPerPixel = [bmBobber samplesPerPixel], bytesPerRow = imgWidth * samplesPerPixel;
-		 BOOL isARGB = ([bmBobber bitmapFormat] & NSAlphaFirstBitmapFormat) ? YES : NO;
-		 int red = isARGB ? 1 : 0, green = isARGB ? 2 : 1, blue = isARGB ? 3 : 2; */
-		
-		float whiteThreshold = [self whiteThreshold];
+        // are we fishing in the background?
+        BOOL fishInBG = (!wowIsFront && allowFishInBG) ? YES : NO; //[bobberFishInBG state] ? YES : NO;
+        
+        // get number of color matches on the bobber and WoW's WindowID
+        int count      = [[[timer userInfo] objectForKey: @"Count"] intValue];
+        int windowID  = [[[timer userInfo] objectForKey: @"WindowID"] intValue];
+        
+        // get our bobber position
+        NSPoint screenPt = [[[timer userInfo] objectForKey: @"ScreenPoint"] pointValue];
+        NSPoint windowPt = [[[timer userInfo] objectForKey: @"WindowPoint"] pointValue];
+        NSPoint thePoint = fishInBG ? windowPt : screenPt;
+        
+        // determine our bobber scan rect
+        NSRect bobberArea = NSZeroRect; bobberArea.origin = thePoint;
+        if(!fishInBG) bobberArea.origin.y = [[overlayWindow screen] frame].size.height - bobberArea.origin.y;
+        float radius = [self bobberRadius]*-1.0;
+        bobberArea = NSInsetRect(bobberArea, radius, radius);
+        
+        // fishing in background              ?         use CoreGraphics to get the window (medium speed)           :              use QuickDraw (fast)
+        //NSBitmapImageRep *bmBobber = fishInBG ? [NSBitmapImageRep bitmapRepWithRect: bobberArea inWindow: windowID] : [NSBitmapImageRep bitmapRepWithScreenShotInRect: bobberArea];
+        NSImage *wow = fishInBG ? [NSImage imageWithBitmapRep: [NSBitmapImageRep bitmapRepWithRect: bobberArea inWindow: windowID]] : [NSImage imageWithScreenShotInRect: bobberArea];
+        if(!wow) return;
+        
+        // alternate updating the dock icon
+        if(_updateDockIcon) {
+            [NSApp setApplicationIconImage: wow];
+            _updateDockIcon = NO;
+        } else {
+            _updateDockIcon = YES;
+        }
+        
+        // scan the image for a splash
+        int hits = 0, x, y;
+        int imgWidth = [wow size].width, imgHeight = [wow size].height;
+        /*
+         unsigned char *data = [bmBobber bitmapData];
+         int imgWidth = [bmBobber pixelsWide], imgHeight = [bmBobber pixelsHigh];
+         int samplesPerPixel = [bmBobber samplesPerPixel], bytesPerRow = imgWidth * samplesPerPixel;
+         BOOL isARGB = ([bmBobber bitmapFormat] & NSAlphaFirstBitmapFormat) ? YES : NO;
+         int red = isARGB ? 1 : 0, green = isARGB ? 2 : 1, blue = isARGB ? 3 : 2; */
+        
+        float whiteThreshold = [self whiteThreshold];
 
         [wow lockFocus];
         for (x=0; x<imgWidth; x++) {
-			//unsigned char *pixel = data + bytesPerRow*x;
-			for (y=0; y<imgHeight; y++) {
-				NSColor *color = NSReadPixel(NSMakePoint(x, y));
+            //unsigned char *pixel = data + bytesPerRow*x;
+            for (y=0; y<imgHeight; y++) {
+                NSColor *color = NSReadPixel(NSMakePoint(x, y));
                 
-				if(([color redComponent]   > whiteThreshold) &&
-				   ([color greenComponent] > whiteThreshold) &&
-				   ([color blueComponent]  > whiteThreshold) ) {
-					hits++;
-					//if(hits > 2)	goto done;
-				}
-				//  pixel += samplesPerPixel;
-			}
-		}
-		[wow unlockFocus];
+                if(([color redComponent]   > whiteThreshold) &&
+                   ([color greenComponent] > whiteThreshold) &&
+                   ([color blueComponent]  > whiteThreshold) ) {
+                    hits++;
+                    //if(hits > 2)    goto done;
+                }
+                //  pixel += samplesPerPixel;
+            }
+        }
+        [wow unlockFocus];
 //        NSLog(@"Splash scanc took %f seconds", [start timeIntervalSinceNow]*-1.0);
-		
-	done:;
-		if(hits)
+        
+    done:;
+        if(hits)
             NSLog(@"FOUND WHITE COLOR: %d count, %d hits", count, hits);
-		
-		BOOL enoughWhite = NO;
-		if(hits) NSLog(@"%d hits; %d count... %.2f", hits, count, count * [self bobberCatchSensitivity]);
-		if(hits >= count * [self bobberCatchSensitivity]) {
-			enoughWhite = YES;
-			NSLog(@"hits >= %.2f with %.3f", count * [self bobberCatchSensitivity], [self bobberCatchSensitivity]);
-		}
-		
-		if(enoughWhite) {
-			// update dock image if we haven't already
-			if(_updateDockIcon) {
-				[NSApp setApplicationIconImage: wow];
-				// [NSApp setApplicationIconImage: [NSImage imageWithBitmapRep: [NSBitmapImageRep correctBitmap: bmBobber]]];
-			}
-			
-			// stop the splash timer
-			[_findSplashTimer invalidate];	_findSplashTimer = nil;
-			[NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(startFishing:) object: nil];
-			
-			// create a CGPoint to click
-			float screenHeight = [[overlayWindow screen] frame].size.height;
-			CGPoint clickPt = CGPointMake(screenPt.x, screenHeight - screenPt.y);
-			
-			// get ahold of the previous mouse position
-//			NSPoint nsPreviousPt = [NSEvent mouseLocation];
-//			nsPreviousPt.y = screenHeight - nsPreviousPt.y;
-//			CGPoint previousPt = CGPointMake(nsPreviousPt.x, nsPreviousPt.y);
-			
-			CGInhibitLocalEvents(TRUE);
-			// activate WoW if it isn't already
-			[self saveFrontProcess];
-			[self activateWoW];
-			
-			usleep(500000);
-			
-			NS_DURING {
-				
-				// post a mouse up event to move the mouse into location
-//				CGPostMouseEvent(previousPt, FALSE, 2, FALSE, FALSE);
-				
-				// create event source
-				if(!_eventSource) _eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
-				
-				// configure the various events
-				CGEventRef moveToBobber = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, clickPt, kCGMouseButtonLeft);
-//				CGEventRef moveToPrevPt = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, previousPt, kCGMouseButtonLeft);
-				CGEventRef rightClickDn = CGEventCreateMouseEvent(_eventSource, kCGEventRightMouseDown, clickPt, kCGMouseButtonRight);
-				CGEventRef rightClickUp = CGEventCreateMouseEvent(_eventSource, kCGEventRightMouseUp, clickPt, kCGMouseButtonRight);
-				
-				// bug in Tiger... event type isn't set in the Create method
-				CGEventSetType(rightClickDn, kCGEventRightMouseDown);
-				CGEventSetType(rightClickUp, kCGEventRightMouseUp);
-				CGEventSetType(moveToBobber, kCGEventMouseMoved);
-//				CGEventSetType(moveToPrevPt, kCGEventMouseMoved);
-				
-				// post the mouse events
-				CGEventPostToPSN(&_wowProcess, moveToBobber);
-				usleep(100000);	// wait 0.1 sec
-				CGEventPostToPSN(&_wowProcess, rightClickDn);
-				CGEventPostToPSN(&_wowProcess, rightClickUp);
-				usleep(100000); // wait 0.1 sec
-//				CGEventPostToPSN(&_wowProcess, moveToPrevPt);
+        
+        BOOL enoughWhite = NO;
+        if(hits) NSLog(@"%d hits; %d count... %.2f", hits, count, count * [self bobberCatchSensitivity]);
+        if(hits >= count * [self bobberCatchSensitivity]) {
+            enoughWhite = YES;
+            NSLog(@"hits >= %.2f with %.3f", count * [self bobberCatchSensitivity], [self bobberCatchSensitivity]);
+        }
+        
+        if(enoughWhite) {
+            // update dock image if we haven't already
+            if(_updateDockIcon) {
+                [NSApp setApplicationIconImage: wow];
+                // [NSApp setApplicationIconImage: [NSImage imageWithBitmapRep: [NSBitmapImageRep correctBitmap: bmBobber]]];
+            }
+            
+            // stop the splash timer
+            [_findSplashTimer invalidate];    _findSplashTimer = nil;
+            [NSObject cancelPreviousPerformRequestsWithTarget: self selector: @selector(startFishing:) object: nil];
+            
+            // create a CGPoint to click
+            float screenHeight = [[overlayWindow screen] frame].size.height;
+            CGPoint clickPt = CGPointMake(screenPt.x, screenHeight - screenPt.y);
+            
+            // get ahold of the previous mouse position
+//            NSPoint nsPreviousPt = [NSEvent mouseLocation];
+//            nsPreviousPt.y = screenHeight - nsPreviousPt.y;
+//            CGPoint previousPt = CGPointMake(nsPreviousPt.x, nsPreviousPt.y);
+            
+            CGInhibitLocalEvents(TRUE);
+            // activate WoW if it isn't already
+            [self saveFrontProcess];
+            [self activateWoW];
+            
+            usleep(500000);
+            
+            NS_DURING {
+                
+                // post a mouse up event to move the mouse into location
+//                CGPostMouseEvent(previousPt, FALSE, 2, FALSE, FALSE);
+                
+                // create event source
+                if(!_eventSource) _eventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
+                
+                // configure the various events
+                CGEventRef moveToBobber = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, clickPt, kCGMouseButtonLeft);
+//                CGEventRef moveToPrevPt = CGEventCreateMouseEvent(_eventSource, kCGEventMouseMoved, previousPt, kCGMouseButtonLeft);
+                CGEventRef rightClickDn = CGEventCreateMouseEvent(_eventSource, kCGEventRightMouseDown, clickPt, kCGMouseButtonRight);
+                CGEventRef rightClickUp = CGEventCreateMouseEvent(_eventSource, kCGEventRightMouseUp, clickPt, kCGMouseButtonRight);
+                
+                // bug in Tiger... event type isn't set in the Create method
+                CGEventSetType(rightClickDn, kCGEventRightMouseDown);
+                CGEventSetType(rightClickUp, kCGEventRightMouseUp);
+                CGEventSetType(moveToBobber, kCGEventMouseMoved);
+//                CGEventSetType(moveToPrevPt, kCGEventMouseMoved);
+                
+                // post the mouse events
+                CGEventPostToPSN(&_wowProcess, moveToBobber);
+                usleep(100000);    // wait 0.1 sec
+                CGEventPostToPSN(&_wowProcess, rightClickDn);
+                CGEventPostToPSN(&_wowProcess, rightClickUp);
+                usleep(100000); // wait 0.1 sec
+//                CGEventPostToPSN(&_wowProcess, moveToPrevPt);
 
-				// release events
-				if(rightClickDn)    CFRelease(rightClickDn); 
-				if(rightClickUp)    CFRelease(rightClickUp); 
-				if(moveToBobber)    CFRelease(moveToBobber);
-//				if(moveToPrevPt)    CFRelease(moveToPrevPt);
-				
-				 // old way I did it (works fine though)
-				 CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, clickPt);
-				 
-				 CGPostMouseEvent(clickPt, TRUE, 2, FALSE, TRUE);
-				 CGPostMouseEvent(clickPt, FALSE, 2, FALSE, FALSE);
-				 
-				 // move the mosue back to where it came from
-//				 CGPostMouseEvent(previousPt, TRUE, 1, FALSE);
-				
-			} NS_HANDLER {
-				CGInhibitLocalEvents(FALSE);
-			} NS_ENDHANDLER
-			
-			// restore state
-			[self restoreFrontProcess];
-			CGInhibitLocalEvents(FALSE);
-			
-			// start fishing again!
-			[self performSelector: @selector(startFishing:) withObject: nil afterDelay: SSRandomIntBetween(2.0, 4.0)];
-		}
+                // release events
+                if(rightClickDn)    CFRelease(rightClickDn); 
+                if(rightClickUp)    CFRelease(rightClickUp); 
+                if(moveToBobber)    CFRelease(moveToBobber);
+//                if(moveToPrevPt)    CFRelease(moveToPrevPt);
+                
+                 // old way I did it (works fine though)
+                 CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, clickPt);
+                 
+                 CGPostMouseEvent(clickPt, TRUE, 2, FALSE, TRUE);
+                 CGPostMouseEvent(clickPt, FALSE, 2, FALSE, FALSE);
+                 
+                 // move the mosue back to where it came from
+//                 CGPostMouseEvent(previousPt, TRUE, 1, FALSE);
+                
+            } NS_HANDLER {
+                CGInhibitLocalEvents(FALSE);
+            } NS_ENDHANDLER
+            
+            // restore state
+            [self restoreFrontProcess];
+            CGInhibitLocalEvents(FALSE);
+            
+            // start fishing again!
+            [self performSelector: @selector(startFishing:) withObject: nil afterDelay: SSRandomIntBetween(2.0, 4.0)];
+        }
     } NS_HANDLER;
     NS_ENDHANDLER
 }
@@ -1083,9 +1081,9 @@ BOOL _updateDockIcon = YES;
     }
     
     NSRect newFrame = [prefWindow frame];
-    newFrame.size.height =	newHeight + ([prefWindow frame].size.height - [[prefWindow contentView] frame].size.height);
-    newFrame.origin.y +=	([[prefWindow contentView] frame].size.height - newHeight); // Origin moves by difference in two views
-    newFrame.origin.x +=	([[prefWindow contentView] frame].size.width - 387)/2; // Origin moves by difference in two views, halved to keep center alignment
+    newFrame.size.height =    newHeight + ([prefWindow frame].size.height - [[prefWindow contentView] frame].size.height);
+    newFrame.origin.y +=    ([[prefWindow contentView] frame].size.height - newHeight); // Origin moves by difference in two views
+    newFrame.origin.x +=    ([[prefWindow contentView] frame].size.width - 387)/2; // Origin moves by difference in two views, halved to keep center alignment
     
     /* // resolution independent resizing
      float vdiff = ([newView frame].size.height - [[mainWindow contentView] frame].size.height) * [mainWindow userSpaceScaleFactor];

@@ -21,7 +21,7 @@ static PrettyError *sharedError = nil;
     @synchronized(self) {
         if (sharedError == nil) {
             sharedError = [super allocWithZone: zone];
-			
+            
             return sharedError;  // assignment and return on first allocation
         }
     }
@@ -34,83 +34,82 @@ static PrettyError *sharedError = nil;
 }
 
 - (id)init {
-	self = [super init];
-	
-	[NSBundle loadNibNamed: @"PrettyErrorWindow" owner: self];
-	
-	NSShadow *shadow = [[[NSShadow alloc] init] autorelease];
-	[shadow setShadowOffset: NSMakeSize(-5, -5)];
-	[shadow setShadowColor: [NSColor shadowColor]];
-	[shadow setShadowBlurRadius: 10.0];
-	
-	NSMutableParagraphStyle *paraStyle = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
-	[paraStyle setAlignment: NSCenterTextAlignment];
-	
-	attributes = [[NSDictionary dictionaryWithObjectsAndKeys:
-		[NSFont fontWithName:@"Arial Black" size: 64],			NSFontAttributeName,
-		[NSColor colorWithCalibratedWhite: 0.9 alpha: 1.0],		NSForegroundColorAttributeName, 
-		paraStyle,												NSParagraphStyleAttributeName,
-		shadow,													NSShadowAttributeName,
-		nil] retain];
-	
-	return self;
+    self = [super init];
+    
+    [NSBundle loadNibNamed: @"PrettyErrorWindow" owner: self];
+    
+    NSShadow *shadow = [[NSShadow alloc] init];
+    [shadow setShadowOffset: NSMakeSize(-5, -5)];
+    [shadow setShadowColor: [NSColor shadowColor]];
+    [shadow setShadowBlurRadius: 10.0];
+    
+    NSMutableParagraphStyle *paraStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+    [paraStyle setAlignment: NSCenterTextAlignment];
+    
+    attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+        [NSFont fontWithName:@"Arial Black" size: 64],            NSFontAttributeName,
+        [NSColor colorWithCalibratedWhite: 0.9 alpha: 1.0],        NSForegroundColorAttributeName, 
+        paraStyle,                                                NSParagraphStyleAttributeName,
+        shadow,                                                    NSShadowAttributeName,
+        nil];
+    
+    return self;
 }
 
 - (void)awakeFromNib {
-	[errorWindow setTitle: @""];
-	[errorWindow setAlphaValue: 0.0];
-	[errorWindow setMovableByWindowBackground: NO];
+    [errorWindow setTitle: @""];
+    [errorWindow setAlphaValue: 0.0];
+    [errorWindow setMovableByWindowBackground: NO];
     [errorWindow setCollectionBehavior: NSWindowCollectionBehaviorCanJoinAllSpaces];
-	[(HUDWindow*)errorWindow setCanBecomeKeyWindow: NO];
-	
-	CenteredTextFieldCell *errorCell = [[CenteredTextFieldCell alloc] initTextCell: @""];
-	[errorCell setAlignment: NSCenterTextAlignment];
-	[errorText setCell: errorCell];
-	[errorCell release];
+    [(HUDWindow*)errorWindow setCanBecomeKeyWindow: NO];
+    
+    CenteredTextFieldCell *errorCell = [[CenteredTextFieldCell alloc] initTextCell: @""];
+    [errorCell setAlignment: NSCenterTextAlignment];
+    [errorText setCell: errorCell];
 }
 
 - (void)beginFade:(NSTimer*)timer {
 
-	[NSTimer scheduledTimerWithTimeInterval: 0.025
-									 target: self
-								   selector: @selector(fadeWindow:)
-								   userInfo: nil
-									repeats: YES];
+    [NSTimer scheduledTimerWithTimeInterval: 0.025
+                                     target: self
+                                   selector: @selector(fadeWindow:)
+                                   userInfo: nil
+                                    repeats: YES];
 }
 
 - (void)fadeWindow:(NSTimer*)timer {
-	[errorWindow setAlphaValue: [errorWindow alphaValue] - 0.02];
-	
-	if( [errorWindow alphaValue] <= 0.0) {
-		[timer invalidate];
-		[errorWindow orderOut: nil];
-	}
+    [errorWindow setAlphaValue: [errorWindow alphaValue] - 0.02];
+    
+    if( [errorWindow alphaValue] <= 0.0) {
+        [timer invalidate];
+        [errorWindow orderOut: nil];
+    }
 }
 
 - (void)displayErrorMessage:(NSString*)error {
-	
-	NSAttributedString *myString = [[[NSAttributedString alloc] initWithString: error
-																	attributes: attributes] autorelease];
-	float strWidth = [myString size].width + 40;
-	NSRect winFrame = [errorWindow frame];
-	winFrame.size.width = strWidth;
-	
-	[errorText setAttributedStringValue: myString];
-	
-	[errorWindow setFrame: winFrame display: NO];
-	[errorWindow center];
-	[errorWindow orderFront: nil];
-	[errorWindow setAlphaValue: 1.0];					
-	[errorWindow display];
-	
-	[self performSelector: @selector(beginFade:) withObject: nil afterDelay: 0.5];
-	/*[NSTimer scheduledTimerWithTimeInterval: 0.5
-									 target: self
-								   selector: @selector(beginFade:)
-								   userInfo: nil
-									repeats: NO];*/
-									
-				
+    
+    NSAttributedString *myString = [[NSAttributedString alloc] initWithString: error
+                                                                    attributes: attributes];
+    float strWidth = [myString size].width + 40;
+    NSRect winFrame = [errorWindow frame];
+    winFrame.size.width = strWidth;
+    
+    [errorText setAttributedStringValue: myString];
+    
+    [errorWindow setFrame: winFrame display: NO];
+    [errorWindow center];
+    [errorWindow orderFront: nil];
+    [errorWindow setAlphaValue: 1.0];                    
+    [errorWindow display];
+    
+    [self performSelector: @selector(beginFade:) withObject: nil afterDelay: 0.5];
+    /*[NSTimer scheduledTimerWithTimeInterval: 0.5
+                                     target: self
+                                   selector: @selector(beginFade:)
+                                   userInfo: nil
+                                    repeats: NO];*/
+                                    
+                
 }
 
 

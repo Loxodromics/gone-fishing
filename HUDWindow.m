@@ -26,19 +26,19 @@
 
         forceDisplay = NO;
         [self setAlphaValue: 1.0];
-		[self setOpaque: NO];
-		[self setHasShadow: NO];
-		[self setMovableByWindowBackground: YES];
-		[self setupCloseWidget];
+        [self setOpaque: NO];
+        [self setHasShadow: NO];
+        [self setMovableByWindowBackground: YES];
+        [self setupCloseWidget];
         [self setBackgroundColor: [self sizedHUDBackground]];
-		
-		// NSPanel stuff
-		// [self setFloatingPanel: YES];
-		// [self setBecomesKeyOnlyIfNeeded: NO];
-		
-		// TransparentWindow stuff
-		[self setProcessesMouseEventTypes: JXMouseMoved]; //JXMouseUp | JXMouseDown];
-		[self setCanBecomeKeyWindow: YES];
+        
+        // NSPanel stuff
+        // [self setFloatingPanel: YES];
+        // [self setBecomesKeyOnlyIfNeeded: NO];
+        
+        // TransparentWindow stuff
+        [self setProcessesMouseEventTypes: JXMouseMoved]; //JXMouseUp | JXMouseDown];
+        [self setCanBecomeKeyWindow: YES];
         
         [[NSNotificationCenter defaultCenter] addObserver:self 
                                                  selector:@selector(windowDidResize:) 
@@ -50,69 +50,67 @@
     return nil;
 }
 - (BOOL) canBecomeKeyWindow {
-	return YES;
+    return YES;
 }
 - (void)dealloc
 {
-    [closeButton release];
     [[NSNotificationCenter defaultCenter] removeObserver: self name: NSWindowDidResizeNotification object: self];    
-    [super dealloc];
 }
 
 - (void)awakeFromNib
 {
-	[self setupCloseWidget];
+    [self setupCloseWidget];
 }
 
 //- ( BOOL ) canBecomeKeyWindow {
-//	return NO;
+//    return NO;
 //}
 
 - (BOOL)closeButtonActive {
-	return [closeButton superview] ? YES : NO;
+    return [closeButton superview] ? YES : NO;
 }
 - (void)hideCloseButton {
-	if(closeButton)	{ 
-		//[closeButton setHidden: YES];
-		[closeButton removeFromSuperview];
-	}
+    if(closeButton)    { 
+        //[closeButton setHidden: YES];
+        [closeButton removeFromSuperview];
+    }
 }
 - (void)showCloseButton {
-	if(closeButton)	{
-		//[closeButton setHidden: NO];
-		[closeButton removeFromSuperview];
-		[[self contentView] addSubview: closeButton];
-	}
+    if(closeButton)    {
+        //[closeButton setHidden: NO];
+        [closeButton removeFromSuperview];
+        [[self contentView] addSubview: closeButton];
+    }
 }
 
 - (void)setupCloseWidget
 {
-	if(closeButton) return;
-	
+    if(closeButton) return;
+    
     closeButton = [[NSButton alloc] initWithFrame:NSMakeRect(3.0, [self frame].size.height - 16.0, 13.0, 13.0)];
-	
-	[closeButton setKeyEquivalent: @"\E"];
+    
+    [closeButton setKeyEquivalent: @"\E"];
     [closeButton setBezelStyle:NSRoundedBezelStyle];
     [closeButton setButtonType:NSMomentaryChangeButton];
     [closeButton setBordered:NO];
-    [closeButton setImage: [[[NSImage alloc] initWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"hud_titlebar-close" ofType: @"tiff"]] autorelease]];
+    [closeButton setImage: [[NSImage alloc] initWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"hud_titlebar-close" ofType: @"tiff"]]];
     [closeButton setTitle:@""];
     [closeButton setImagePosition:NSImageBelow];
     [closeButton setFocusRingType:NSFocusRingTypeNone];
-	
+    
     [closeButton setAction:@selector(orderOut:)];
     [closeButton setTarget:self];
 }
 
 - (void)setCloseButtonAction:(SEL)selector forTarget:(id)target {
-	if(!closeButton) {
-		[self setupCloseWidget];
-	}
-	
-	[closeButton setTarget: target];
-	[closeButton setAction: selector];
-	[closeButton setKeyEquivalent: @"\E"];
-	//[closeButton setHidden: NO];
+    if(!closeButton) {
+        [self setupCloseWidget];
+    }
+    
+    [closeButton setTarget: target];
+    [closeButton setAction: selector];
+    [closeButton setKeyEquivalent: @"\E"];
+    //[closeButton setHidden: NO];
 }
 
 - (void)windowDidResize:(NSNotification *)aNotification
@@ -170,7 +168,7 @@
     
     // Composite background color into bg
     NSColor *bgColor = [NSColor colorWithCalibratedWhite:0.05 alpha:alpha];
-	[bgColor set];
+    [bgColor set];
     [bgPath fill];
     
     // Make titlebar path
@@ -206,15 +204,15 @@
     
     // Title
     NSFont *titleFont = [NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]];
-    NSMutableParagraphStyle *paraStyle = [[[NSMutableParagraphStyle alloc] init] autorelease];
+    NSMutableParagraphStyle *paraStyle = [[NSMutableParagraphStyle alloc] init];
     [paraStyle setParagraphStyle:[NSParagraphStyle defaultParagraphStyle]];
     [paraStyle setAlignment:NSCenterTextAlignment];
     [paraStyle setLineBreakMode:NSLineBreakByTruncatingTail];
-	
+    
     NSMutableDictionary *titleAttrs = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-        titleFont,				NSFontAttributeName,
-        [NSColor whiteColor],	NSForegroundColorAttributeName,
-        paraStyle,				NSParagraphStyleAttributeName,
+        titleFont,                NSFontAttributeName,
+        [NSColor whiteColor],    NSForegroundColorAttributeName,
+        paraStyle,                NSParagraphStyleAttributeName,
         nil];
     
     NSSize titleSize = [[self title] sizeWithAttributes:titleAttrs];
@@ -226,7 +224,7 @@
     [[self title] drawInRect: titleRect withAttributes: titleAttrs];
     [bg unlockFocus];
     
-    return [NSColor colorWithPatternImage: [bg autorelease]];
+    return [NSColor colorWithPatternImage: bg];
 }
 
 - (void)setTitle:(NSString *)value {
