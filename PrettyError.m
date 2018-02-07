@@ -32,26 +32,6 @@ static PrettyError *sharedError = nil;
 {
     return self;
 }
- 
-- (id)retain
-{
-    return self;
-}
- 
-- (unsigned)retainCount
-{
-    return UINT_MAX;  //denotes an object that cannot be released
-}
- 
-- (void)release
-{
-    //do nothing
-}
- 
-- (id)autorelease
-{
-    return self;
-}
 
 - (id)init {
 	self = [super init];

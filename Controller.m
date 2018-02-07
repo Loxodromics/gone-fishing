@@ -792,8 +792,9 @@ AECreateDesc:;
         }
         
 		if(numFound >= 3) {
-			foundPtQ1.x = foundPtQ4.x = foundPtQ1.x + [self bobberOffsetX];
+			foundPtQ1.x = foundPtQ4.x = (foundPtQ1.x / 1.0) + [self bobberOffsetX];
 			foundPtQ1.y += [self bobberOffsetY];  // since it's in Q1
+//            foundPtQ4.y /= 2.0;
 			foundPtQ4.y -= [self bobberOffsetY];  // since it's in Q4
             
 			// get the point in the window to a point on the screen
@@ -802,12 +803,17 @@ AECreateDesc:;
             NSPoint screenPt = foundPtQ1;
 			screenPt.x += wowRect.origin.x;
 			screenPt.y += ([[overlayWindow screen] frame].size.height - (wowRect.origin.y + wowRect.size.height));
+            
+
             NSLog(@"Found pt in Q1 screen space: %@", NSStringFromPoint(screenPt));
 			// now we have screen point in Q1 space
             
+
 			// create new window bounds
 			NSRect newRect = NSZeroRect;
-			newRect.origin = screenPt;
+            newRect.origin = screenPt;
+//            newRect.origin.x = screenPt.x/2.0;
+//            newRect.origin.y = screenPt.y/2.0;
 			newRect = NSInsetRect(newRect, ([self bobberRadius]+20)*-1.0, ([self bobberRadius]+20)*-1.0);
 			[overlayWindow setFrame: newRect display: YES];
             
@@ -826,6 +832,9 @@ AECreateDesc:;
 			[userInfo setObject: [NSValue valueWithPoint: screenPt] forKey: @"ScreenPoint"];
 			[userInfo setObject: [NSNumber numberWithInt: windowID] forKey: @"WindowID"];
 			[userInfo setObject: [NSNumber numberWithInt: numFound] forKey: @"Count"];
+            
+            NSLog(@"ScreenPoint: %@", NSStringFromPoint(screenPt));
+            NSLog(@"WindowPoint: %@", NSStringFromPoint(foundPtQ4));
 			
 			// and off it goes
 			_findSplashTimer = [NSTimer scheduledTimerWithTimeInterval: 0.05 
@@ -911,7 +920,7 @@ BOOL _updateDockIcon = YES;
 			}
 		}
 		[wow unlockFocus];
-		NSLog(@"Splash scanc took %f seconds", [start timeIntervalSinceNow]*-1.0);
+//        NSLog(@"Splash scanc took %f seconds", [start timeIntervalSinceNow]*-1.0);
 		
 	done:;
 		if(hits)
