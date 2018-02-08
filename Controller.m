@@ -644,15 +644,21 @@ AECreateDesc:;
 
 - (void)locateBobber:(id)timer {
     
+    bool isRetina = false;
+    double retinaFactor = 1.0;
+    if (isRetina) {
+        retinaFactor = 2.0;
+    }
+    
     // check fishing timer
-    if([self isFishingTimerEnabled]) {
+    if ([self isFishingTimerEnabled]) {
         NSString *triggerTime = [[self fishingTerminateTime] descriptionWithCalendarFormat: @"%I:%M %p" timeZone: nil locale: nil];
         NSString *currentTime = [[NSDate date] descriptionWithCalendarFormat: @"%I:%M %p" timeZone: nil locale: nil];
         
         if( [currentTime isEqualToString: triggerTime] ) {
             NSLog(@"Terminating fishing at: %@", currentTime);
             [self stopFishing: nil];
-            if([self shouldQuitWoW])
+            if ([self shouldQuitWoW])
                 [self quitWoW];
             return;
         }
@@ -660,13 +666,14 @@ AECreateDesc:;
     NSDate *start = [NSDate date];
     
     // check if we should pause
-    if([self shouldPause]) return;
+    if([self shouldPause])
+        return;
     
     NSLog(@"Scanning for the bobber.");
     // get a handle to WoW's window
     int windowID = [self getWOWWindowID: [self getWoWProcessSerialNumber]];
     
-    if(windowID) {
+    if (windowID) {
         // hide the WoW Interface
         if( [self shouldKeepInterfaceVisible] ) {
             [self toggleInterface];
@@ -700,8 +707,9 @@ AECreateDesc:;
             // break our search color into its components
             bobberColor = [self bobberColor];
             float bobberRed    = [bobberColor redComponent];//*255;
-            float bobberGreen    = [bobberColor greenComponent];//*255;
-            float bobberBlue    = [bobberColor blueComponent];//*255;
+            float bobberGreen  = [bobberColor greenComponent];//*255;
+            float bobberBlue   = [bobberColor blueComponent];//*255;
+            NSLog(@"Bobber Red: %f, Green: %f, Blue: %f", bobberRed, bobberGreen, bobberBlue);
             
             // -----------
             int x, y;
@@ -738,38 +746,46 @@ AECreateDesc:;
             [wow lockFocus];
             float red, green, blue;
             // this search is over Q4 window space
-            for (y=0; y<imgHeight; y+=2) {
+            for ( y = 0; y < imgHeight; y+=2 ) {
                 
                 //NSColor *color = NSReadPixel(NSMakePoint(111, 111));
                 //red    = [color redComponent];
                 //green = [color greenComponent];
                 //blue = [color blueComponent];
-                //NSLog(@"Got Red: %f, Green: %f, Blue: %f", red, green, blue);
+                
                 //break;
                 
                 // unsigned char *pixel = data + bytesPerRow*y;
-                for (x=0; x<imgWidth; x+=2) {
+                for ( x = 0; x < imgWidth; x+=2 ) {
                     NSColor *color = NSReadPixel(NSMakePoint(x, y));
-                    red    = [color redComponent];
+                    red   = [color redComponent];
                     green = [color greenComponent];
-                    blue = [color blueComponent];
+                    blue  = [color blueComponent];
                     
-                    if((red > (bobberRed - ERRORFLT) && red < (bobberRed + ERRORFLT)) 
-                       && (green > (bobberGreen - ERRORFLT) && green < (bobberGreen + ERRORFLT)) 
-                       && (blue > (bobberBlue - ERRORFLT) && blue < (bobberBlue + ERRORFLT)) ) {
+                    
+                    if ( (fabsf(red - bobberRed) < ERRORFLT)  &&
+                         (fabsf(green - bobberGreen) < ERRORFLT) &&
+                         (fabsf(blue - bobberBlue) < ERRORFLT) ) {
                         
-                        if(!foundX && !foundY) {
+//                        NSLog(@"Found Red: %f, Green: %f, Blue: %f", red, green, blue);
+                        
+                        if (!foundX && !foundY) {
                             foundX = x; foundY = y;
-                            numFound ++;
-                        } else {
+                            numFound++;
+//                            NSLog(@"found %d, %d", x, y);
+                        }
+                        else
+                        {
                             // only count this point if it's within [bobberRadius] pixels of the average
-                            if(   fabsf(x - (foundX / (numFound*1.0f))) < [self bobberRadius]*2.0f
-                               && fabsf(y - (foundY / (numFound*1.0f))) < [self bobberRadius]*2.0f) {
+                            if (   fabsf(x - (foundX / (numFound*1.0f))) < [self bobberRadius] * 2.0f
+                                && fabsf(y - (foundY / (numFound*1.0f))) < [self bobberRadius] * 2.0f ) {
                                 
                                 foundX += x;
                                 foundY += y;
-                                numFound ++;
-                            } else { ; }
+                                numFound++;
+//                                NSLog(@"found %d, %d", x, y);
+                            }
+                            else { ; }
                         }
                     }
                     //pixel += samplesPerPixel + samplesPerPixel; // since we are skipping over 2 pixels at a time
@@ -778,8 +794,8 @@ AECreateDesc:;
             [wow unlockFocus];
 
              NSLog(@"Completed scan in %f seconds.", [start timeIntervalSinceNow]*-1.0);
-            foundPt.x = foundX / (numFound*1.0);
-            foundPt.y = foundY / (numFound*1.0);
+            foundPt.x = foundX / (numFound * 1.0);
+            foundPt.y = foundY / (numFound * 1.0);
             
             foundPtQ1 = foundPtQ4 = foundPt;
             foundPtQ4.y = imgHeight - foundPtQ1.y;  // Q4 for NSImage, Q1 for NSBitmapImageRep
@@ -790,9 +806,9 @@ AECreateDesc:;
         }
         
         if(numFound >= 3) {
-            foundPtQ1.x = foundPtQ4.x = (foundPtQ1.x / 1.0) + [self bobberOffsetX];
+            foundPtQ1.x = foundPtQ4.x = (foundPtQ1.x / retinaFactor) + [self bobberOffsetX];
             foundPtQ1.y += [self bobberOffsetY];  // since it's in Q1
-//            foundPtQ4.y /= 2.0;
+            foundPtQ4.y /= retinaFactor;
             foundPtQ4.y -= [self bobberOffsetY];  // since it's in Q4
             
             // get the point in the window to a point on the screen
