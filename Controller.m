@@ -300,7 +300,7 @@
     
     // queue up bobber locater & fishing timer
     [self performSelector: @selector(locateBobber:) withObject: nil afterDelay: 4.0];
-    [self performSelector: @selector(startFishing:) withObject: nil afterDelay: 26.0];
+    [self performSelector: @selector(startFishing:) withObject: nil afterDelay: 29.0];
     
     self.isFishing = YES;
 }
@@ -568,7 +568,8 @@ AECreateDesc:;
 
 - (void)toggleInterface {
     if( [self shouldKeepInterfaceVisible] ) {
-        [self sendKeySequence: @"z" withModifier: NSAlternateKeyMask];
+        NSLog(@"toggleInterface");
+        [self sendKeySequence: @"t" withModifier: NSAlternateKeyMask]; /// z is different on german keyboard so use alt-t instead
     }
 }
 
@@ -676,6 +677,7 @@ AECreateDesc:;
     if (windowID) {
         // hide the WoW Interface
         if( [self shouldKeepInterfaceVisible] ) {
+            NSLog(@"toggleInterface off");
             [self toggleInterface];
             usleep(200000);
         }
@@ -689,7 +691,8 @@ AECreateDesc:;
         // NSLog(@"Got WoW image: %@", wow);
         
         // restore the current process state
-        if( [self shouldKeepInterfaceVisible] ) { 
+        if( [self shouldKeepInterfaceVisible] ) {
+            NSLog(@"toggleInterface on");
             [self toggleInterface];
         }
         
