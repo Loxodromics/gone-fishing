@@ -635,6 +635,35 @@ AECreateDesc:;
     }
 }
 
+- (void) shiftKeyDown {
+    [self getWoWProcessSerialNumber];
+    CFRelease(CGEventCreate(NULL));        // hack to make CGEventCreateKeyboardEvent work... don't ask me
+    NS_DURING {
+        CGEventRef sftKeyDn = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)56, TRUE);
+        CGEventPostToPSN(&_wowProcess, sftKeyDn);
+        if(sftKeyDn) CFRelease(sftKeyDn);
+        CGInhibitLocalEvents(FALSE);
+    } NS_HANDLER {
+        NSLog(@"Error during sendKeySequence!");
+        CGInhibitLocalEvents(FALSE);
+    } NS_ENDHANDLER
+}
+
+- (void) shiftKeyUp {
+    [self getWoWProcessSerialNumber];
+    CFRelease(CGEventCreate(NULL));        // hack to make CGEventCreateKeyboardEvent work... don't ask me
+        NS_DURING {
+        CGEventRef sftKeyUp = CGEventCreateKeyboardEvent(NULL, (CGKeyCode)56, FALSE);
+        CGEventPostToPSN(&_wowProcess, sftKeyUp);
+        if(sftKeyUp) CFRelease(sftKeyUp);
+        CGInhibitLocalEvents(FALSE);
+    } NS_HANDLER {
+        NSLog(@"Error during sendKeySequence!");
+        CGInhibitLocalEvents(FALSE);
+    } NS_ENDHANDLER
+    
+}
+
 #pragma mark Fishing Callbacks
 
 
@@ -979,6 +1008,9 @@ BOOL _updateDockIcon = YES;
             
             NS_DURING {
                 
+                [self shiftKeyDown];
+                usleep(100000); // wait 0.1 sec
+                
                 // post a mouse up event to move the mouse into location
 //                CGPostMouseEvent(previousPt, FALSE, 2, FALSE, FALSE);
                 
@@ -1011,11 +1043,13 @@ BOOL _updateDockIcon = YES;
                 if(moveToBobber)    CFRelease(moveToBobber);
 //                if(moveToPrevPt)    CFRelease(moveToPrevPt);
                 
-                 // old way I did it (works fine though)
-                 CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, clickPt);
-                 
-                 CGPostMouseEvent(clickPt, TRUE, 2, FALSE, TRUE);
-                 CGPostMouseEvent(clickPt, FALSE, 2, FALSE, FALSE);
+                // old way I did it (works fine though)
+                CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, clickPt);
+                CGPostMouseEvent(clickPt, TRUE, 2, FALSE, TRUE);
+                usleep(100000); // wait 0.1 sec
+                CGPostMouseEvent(clickPt, FALSE, 2, FALSE, FALSE);
+                usleep(100000); // wait 0.1 sec
+                [self shiftKeyUp];
                  
                  // move the mosue back to where it came from
 //                 CGPostMouseEvent(previousPt, TRUE, 1, FALSE);
