@@ -16,8 +16,8 @@
 
 	//result = [self convertBaseToScreen:point]; // Doesn't work... it looks like the y co-ordinate is not inverted as necessary
 
-	result.x = screenFrame.origin.x + _frame.origin.x + point.x;
-	result.y = screenFrame.origin.y + screenFrame.size.height - (_frame.origin.y + point.y);
+	result.x = screenFrame.origin.x + screenFrame.origin.x + point.x;
+	result.y = screenFrame.origin.y + screenFrame.size.height - (screenFrame.origin.y + point.y);
 
 	return result;
 }
@@ -26,8 +26,8 @@
 	NSPoint result;
 	NSRect screenFrame = [[self screen] frame];
 	NSLog(@"screenToWindowCoordinates has not been tested");
-	result.x = point.x - (screenFrame.origin.x + _frame.origin.x);
-	result.y = screenFrame.origin.y + screenFrame.size.height - _frame.origin.y - point.y;
+	result.x = point.x - (screenFrame.origin.x + screenFrame.origin.x);
+	result.y = screenFrame.origin.y + screenFrame.size.height - screenFrame.origin.y - point.y;
 
 	return point; // To be completed
 }
